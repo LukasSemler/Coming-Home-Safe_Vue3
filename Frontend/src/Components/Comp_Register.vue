@@ -104,21 +104,20 @@
               </div>
               <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
                 <button
-                  v-if="!checkErrorOTP"
                   type="button"
                   class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:col-start-2 sm:text-sm"
                   @click="register"
                 >
                   Verifizieren
                 </button>
-                <button
+                <!-- <button
                   v-else
                   type="button"
                   class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gray-600 text-base font-medium text-white hover:bg-gray-700 sm:col-start-2 sm:text-sm"
                   :disabled="checkErrorOTP"
                 >
                   Verifizieren
-                </button>
+                </button> -->
                 <button
                   type="button"
                   class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-1 sm:text-sm"
@@ -491,7 +490,7 @@ import axios from 'axios';
 
 const router = useRouter();
 let showError = ref(false);
-let showVerifikation = ref(true);
+let showVerifikation = ref(false);
 
 let image = ref(null);
 let imageSchicken = ref(null);
@@ -596,7 +595,7 @@ async function sendImage() {
 
 async function sendData() {
   // Register erledigen
-  const res = await axios.post('/register', {
+  const res = await axios.post('/sendDataRegister', {
     vorname: state.vorname,
     nachname: state.nachname,
     email: state.email,
@@ -614,8 +613,15 @@ async function sendData() {
 
 async function register() {
   try {
-    await sendImage();
-    await sendData();
+    if (
+      code.value ==
+      `${state2.char1}${state2.char2}${state2.char3}${state2.char4}${state2.char5}${state2.char6}`
+    ) {
+      await sendImage();
+      await sendData();
+    }
+    else
+      alert("Code stimmt nicht überein")
   } catch (error) {
     console.log(error);
   }

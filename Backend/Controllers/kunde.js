@@ -1,4 +1,9 @@
-import { checkIfUserExists, registerUser, loginUser, changePasswordDB } from '../Models/models.js';
+import {
+  checkIfUserExists,
+  registerUserDB,
+  loginUser,
+  changePasswordDB,
+} from '../Models/models.js';
 import validator from 'is-my-json-valid';
 import sendCode from '../Mail/mail.js';
 
@@ -101,4 +106,13 @@ const sendThumbnail = async (req, res) => {
   }
 };
 
-export { sendCodeUser, sendThumbnail };
+const sendDataRegister = async (req, res) => {
+  console.log(req.body);
+  const result = await registerUserDB(req.body);
+
+  if (result) return res.status(200).send('Erfolgreich registriert');
+
+  return res.status(500).send('Fehler beim Registrieren');
+};
+
+export { sendCodeUser, sendThumbnail, sendDataRegister };

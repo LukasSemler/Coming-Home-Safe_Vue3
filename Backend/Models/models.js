@@ -7,7 +7,7 @@ const checkIfUserExists = async (email) => {
   return false;
 };
 
-const registerUser = async (user) => {
+const registerUserDB = async (user) => {
   const client = await pool.connect();
 
   try {
@@ -15,20 +15,21 @@ const registerUser = async (user) => {
 
     const { rows } = await client.query(
       `insert into kunde (vorname, nachname, email, passwort, strasse, ort, plz, hobbysinteressen, geburtsdatum, isadmin,
-                   suser)
-values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) returning *;`,
+                   suser, link_thumbnail)
+values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) returning *;`,
       [
         user.vorname,
         user.nachname,
         user.email,
-        user.passwort,
-        user.strasse,
-        user.ort,
+        user.password,
+        user.strasse_hnr,
+        user.stadt,
         user.plz,
-        user.hobbysinteressen,
-        user.geburtsdatum,
+        'Noch einbauen',
+        '2004-12-01',
         false,
         false,
+        user.link_thumbnail,
       ],
     );
 
@@ -91,4 +92,4 @@ async function sendPositionDB(position) {
   );
 }
 
-export { checkIfUserExists, registerUser, loginUser, changePasswordDB, sendPositionDB };
+export { checkIfUserExists, registerUserDB, loginUser, changePasswordDB, sendPositionDB };
