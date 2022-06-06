@@ -115,4 +115,24 @@ const sendDataRegister = async (req, res) => {
   return res.status(500).send('Fehler beim Registrieren');
 };
 
-export { sendCodeUser, sendThumbnail, sendDataRegister };
+const login = async (req, res) => {
+  console.log(req.body);
+  const { email, password } = req.body;
+
+  const result = await loginUser(email, password);
+  console.log('result: ', result);
+
+  //Schauen ob der User ein Admin ist, wenn ja Mail schicken, sonst normal anmelden
+  if (result) {
+    if (result.isadmin) {
+      const code = makeAuthCode();
+      sendCode(code, email, `${result.vorname} ${result.nachname}`, code, res, result);
+      return res.status(200).send(JSON.stringify({ foundUser: result, code: code }));
+    } else if (!result.isAdmin)
+      return res.status(200).send(JSON.stringify({ foundUser: result, code: 'kein Admin' }));
+  }
+
+  return res.status(500).send('Fehler beim Login');
+};
+
+export { sendCodeUser, sendThumbnail, sendDataRegister, login };

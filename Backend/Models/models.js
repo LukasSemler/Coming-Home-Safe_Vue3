@@ -51,6 +51,8 @@ values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) returning *;`,
 };
 
 const loginUser = async (email, password) => {
+  console.log('email: ' + email);
+  console.log('password: ' + password);
   const { rows } = await query('SELECT * FROM kunde WHERE email = $1', [email]);
 
   if (rows[0].passwort == password) return rows[0];

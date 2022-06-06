@@ -15,9 +15,17 @@ function SaveState(abmelden) {
 //MainStore
 export const PiniaStore = defineStore('Coming-Home-Safe', {
   //State
-  state: () => ({}),
+  state: () => ({
+    aktiverUser: null,
+  }),
   //Getter
   getters: {},
   //Actions
-  actions: {},
+  actions: {
+    setAktivenUser(user) {
+      this.aktiverUser = user;
+
+      SaveState();
+    },
+  },
 });

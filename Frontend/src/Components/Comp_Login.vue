@@ -184,8 +184,8 @@ async function login(e) {
 
       console.log(res.data);
 
-      if (res.status == 201) {
-        store.setAktivenUser(res.data);
+      if (res.status == 200) {
+        store.aktiverUser = res.data.foundUser;
 
         router.push('/account');
       }
