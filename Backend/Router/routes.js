@@ -1,6 +1,12 @@
 import express from 'express';
 import asyncHandler from 'express-async-handler';
-import { sendCodeUser, sendThumbnail, sendDataRegister, login } from '../Controllers/kunde.js';
+import {
+  sendCodeUser,
+  sendThumbnail,
+  sendDataRegister,
+  login,
+  sendPosition,
+} from '../Controllers/kunde.js';
 
 const router = express.Router();
 
@@ -11,4 +17,6 @@ router.post('/sendCodeRegister', asyncHandler(sendCodeUser));
 router.post('/sendThumbnail', asyncHandler(sendThumbnail));
 router.post('/sendDataRegister', asyncHandler(sendDataRegister));
 router.post('/login', asyncHandler(login));
+
+router.post('/sendPosition', asyncHandler(sendPosition));
 export default router;

@@ -23,6 +23,14 @@
       >
         {{ statusTrackingButton }}
       </button>
+      <button
+        v-if="statusTracking"
+        @click="startStopTracker"
+        type="button"
+        :class="`inline-flex items-center px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white ${color} ${colorHover} `"
+      >
+        Alarm
+      </button>
     </div>
   </div>
 </template>
@@ -38,8 +46,9 @@ const store = PiniaStore();
 const router = useRouter();
 
 let map = ref(null);
-let mapAccessToken =
-  'pk.eyJ1IjoiY29taW5naG9tZXNhZmUiLCJhIjoiY2wwN3RzZThnMDF3czNjbzFndnNrZ3h4OCJ9.xuaKaO_7XzSqiIBCAvcT7w';
+let mapAccessToken = ref(
+  'pk.eyJ1IjoiY29taW5naG9tZXNhZmUiLCJhIjoiY2wwN3RzZThnMDF3czNjbzFndnNrZ3h4OCJ9.xuaKaO_7XzSqiIBCAvcT7w',
+);
 let mapStyle = 'mapbox://styles/mapbox/streets-v11';
 
 let centerPosition = ref(null);
@@ -86,7 +95,7 @@ async function centerMap() {
   centerPosition.value = { lat, lng };
 
   //Map-Initialisieren
-  mapbox.accessToken = mapAccessToken;
+  mapbox.accessToken = mapAccessToken.value;
   map.value = new mapbox.Map({
     container: 'map', // container ID
     style: mapStyle, // style URL
@@ -103,7 +112,7 @@ async function startStopTracker() {
     colorHover.value = 'hover:bg-red-600';
     statusTrackingButton.value = 'Stop';
 
-    interval.value = setInterval(track, 1000);
+    interval.value = setInterval(track, 5000);
   } else {
     statusTracking.value = false;
     statusTrackingButton.value = 'Start';
@@ -130,7 +139,7 @@ async function track() {
 
     //Coordinaten werden eingesetzt!
     let standortDaten = await axios.get(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${accessToken.value}`,
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapAccessToken.value}`,
     );
     const standort = standortDaten.data.features[0].place_name;
     console.log(standort);
@@ -153,7 +162,7 @@ async function track() {
       lat,
       lng,
     };
-    map.value.center = [this.centerPosition.lng, this.centerPosition.lat];
+    map.value.center = [centerPosition.value.lng, centerPosition.value.lat];
 
     //Datum
     const date = new Date();

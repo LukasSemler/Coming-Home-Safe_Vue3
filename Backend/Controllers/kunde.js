@@ -3,11 +3,13 @@ import {
   registerUserDB,
   loginUser,
   changePasswordDB,
+  sendPositionDB,
 } from '../Models/models.js';
 import validator from 'is-my-json-valid';
 import sendCode from '../Mail/mail.js';
 
 import fs from 'fs';
+
 import path from 'path';
 
 const dirname = path.resolve();
@@ -135,4 +137,14 @@ const login = async (req, res) => {
   return res.status(500).send('Fehler beim Login');
 };
 
-export { sendCodeUser, sendThumbnail, sendDataRegister, login };
+const sendPosition = async (req, res) => {
+  const position = req.body;
+
+  const result = await sendPositionDB(position);
+
+  if (result) return res.status(200).send('Position successfully sent');
+
+  res.status(500).send('Error when sending position');
+};
+
+export { sendCodeUser, sendThumbnail, sendDataRegister, login, sendPosition };
