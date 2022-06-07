@@ -266,7 +266,6 @@
       </div>
     </div>
   </div>
-  <Router-link to="/usermap">Click Me</Router-link>
 </template>
 
 <script setup>
@@ -276,7 +275,7 @@ import { XCircleIcon } from '@heroicons/vue/outline';
 import { XIcon } from '@heroicons/vue/solid';
 
 import { reactive, computed, ref } from 'vue';
-import { useRouter, RouterLink } from 'vue-router';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
 
 import useValidate from '@vuelidate/core';
