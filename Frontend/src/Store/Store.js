@@ -23,9 +23,6 @@ export const PiniaStore = defineStore('Coming-Home-Safe', {
     getAktivenUser() {
       return this.aktiverUser;
     },
-    isAdmin() {
-      return this.aktiverUser.isAdmin;
-    },
   },
   //Actions
   actions: {
@@ -33,6 +30,10 @@ export const PiniaStore = defineStore('Coming-Home-Safe', {
       this.aktiverUser = user;
 
       SaveState();
+    },
+    deleteAktivenUser() {
+      this.aktiverUser = null;
+      SaveState(true);
     },
   },
 });

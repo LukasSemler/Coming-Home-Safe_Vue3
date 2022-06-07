@@ -475,7 +475,7 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
 import { MailIcon } from '@heroicons/vue/outline';
 import { XCircleIcon } from '@heroicons/vue/outline';

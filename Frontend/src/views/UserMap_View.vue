@@ -2,12 +2,18 @@
   <div>
     <h1 class="text-center text-4xl mt-3 mb-5">User Map</h1>
     <div id="map" style="height: 600px"></div>
+    <button @click="abmelden">Log Out</button>
   </div>
 </template>
 
 <script setup>
 import mapbox from 'mapbox-gl';
+import { PiniaStore } from '../Store/Store';
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+
+const store = PiniaStore();
+const router = useRouter();
 
 let map = ref(null);
 let mapAccessToken =
@@ -23,4 +29,9 @@ onMounted(() => {
     zoom: 13, // starting zoom
   });
 });
+
+function abmelden() {
+  store.deleteAktivenUser();
+  router.push('/');
+}
 </script>

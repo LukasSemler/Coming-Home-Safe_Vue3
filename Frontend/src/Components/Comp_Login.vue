@@ -183,7 +183,7 @@
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
       <img
         class="mx-auto h-12 w-auto"
-        src="../../public/Coming-Home-Safe-Icon.webp"
+        src="/Coming-Home-Safe-Icon.webp"
         alt="Electronic City"
       />
       <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Login</h2>
@@ -270,6 +270,7 @@
       </div>
     </div>
   </div>
+  <Router-link to="/usermap">Click Me</Router-link>
 </template>
 
 <script setup>
@@ -279,7 +280,7 @@ import { XCircleIcon } from '@heroicons/vue/outline';
 import { XIcon } from '@heroicons/vue/solid';
 
 import { reactive, computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, RouterLink } from 'vue-router';
 import axios from 'axios';
 
 import useValidate from '@vuelidate/core';
@@ -335,7 +336,7 @@ async function login(e) {
         // store.aktiverUser = res.data.foundUser;
         store.setAktivenUser(res.data.foundUser);
 
-        router.push('/userMap');
+        router.push('/usermap');
       } else {
         code.value = res.data.code;
         console.log('Code: ', code.value);
