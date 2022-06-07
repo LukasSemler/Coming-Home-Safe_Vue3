@@ -1,4 +1,138 @@
 <template>
+  <TransitionRoot as="template" :show="showOTP">
+    <Dialog as="div" class="relative z-10" @close="showOTP = false">
+      <TransitionChild
+        as="template"
+        enter="ease-out duration-300"
+        enter-from="opacity-0"
+        enter-to="opacity-100"
+        leave="ease-in duration-200"
+        leave-from="opacity-100"
+        leave-to="opacity-0"
+      >
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+      </TransitionChild>
+
+      <div class="fixed z-10 inset-0 overflow-y-auto">
+        <div
+          class="flex items-end sm:items-center justify-center min-h-full p-4 text-center sm:p-0"
+        >
+          <TransitionChild
+            as="template"
+            enter="ease-out duration-300"
+            enter-from="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            enter-to="opacity-100 translate-y-0 sm:scale-100"
+            leave="ease-in duration-200"
+            leave-from="opacity-100 translate-y-0 sm:scale-100"
+            leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+          >
+            <DialogPanel
+              class="relative bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-sm sm:w-full sm:p-6"
+            >
+              <div>
+                <div
+                  class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gray-100"
+                >
+                  <MailIcon class="h-6 w-6" aria-hidden="true" />
+                </div>
+                <div class="mt-3 text-center sm:mt-5">
+                  <DialogTitle as="h3" class="text-lg leading-6 font-medium text-gray-900">
+                    2 Faktoren Bestätigung
+                  </DialogTitle>
+                  <div class="mt-2">
+                    <p class="text-sm text-gray-500 mb-3">
+                      Lorem ipsum dolor sit amet consectetur adipisicing elit. Eveniet assumenda
+                      fuga ducimus debitis esse impedit dolor
+                    </p>
+
+                    <hr />
+
+                    <div class="flex flex-col mt-6">
+                      <span
+                        >Geben Sie den Code ein, der an
+                        <span class="font-bold">{{ state.email }}</span> gesendet wurde</span
+                      >
+                    </div>
+
+                    <div id="otp" class="flex flex-row justify-center text-center px-2 mt-5">
+                      <input
+                        v-model="state2.char1"
+                        class="m-2 border h-10 w-10 text-center form-control rounded"
+                        type="text"
+                        id="first"
+                        maxlength="1"
+                      />
+                      <input
+                        v-model="state2.char2"
+                        class="m-2 border h-10 w-10 text-center form-control rounded"
+                        type="text"
+                        id="second"
+                        maxlength="1"
+                      />
+                      <input
+                        v-model="state2.char3"
+                        class="m-2 border h-10 w-10 text-center form-control rounded"
+                        type="text"
+                        id="third"
+                        maxlength="1"
+                      />
+                      <input
+                        v-model="state2.char4"
+                        class="m-2 border h-10 w-10 text-center form-control rounded"
+                        type="text"
+                        id="fourth"
+                        maxlength="1"
+                      />
+                      <input
+                        v-model="state2.char5"
+                        class="m-2 border h-10 w-10 text-center form-control rounded"
+                        type="text"
+                        id="fifth"
+                        maxlength="1"
+                      />
+                      <input
+                        v-model="state2.char6"
+                        class="m-2 border h-10 w-10 text-center form-control rounded"
+                        type="text"
+                        id="sixth"
+                        maxlength="1"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
+                <button
+                  type="button"
+                  class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:col-start-2 sm:text-sm"
+                  @click="loginOTP"
+                >
+                  Verifizieren
+                </button>
+                <!-- <button
+                  v-else
+                  type="button"
+                  class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gray-600 text-base font-medium text-white hover:bg-gray-700 sm:col-start-2 sm:text-sm"
+                  :disabled="checkErrorOTP"
+                >
+                  Verifizieren
+                </button> -->
+                <button
+                  type="button"
+                  class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-1 sm:text-sm"
+                  @click="showOTP = false"
+                  ref="cancelButtonRef"
+                >
+                  Cancel
+                </button>
+              </div>
+            </DialogPanel>
+          </TransitionChild>
+        </div>
+      </div>
+    </Dialog>
+  </TransitionRoot>
+
   <div
     aria-live="assertive"
     class="fixed inset-0 flex items-end px-4 py-6 pointer-events-none sm:p-6 sm:items-start z-40"
@@ -139,6 +273,8 @@
 </template>
 
 <script setup>
+import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
+import { MailIcon } from '@heroicons/vue/outline';
 import { XCircleIcon } from '@heroicons/vue/outline';
 import { XIcon } from '@heroicons/vue/solid';
 
@@ -153,7 +289,18 @@ import { PiniaStore } from '../Store/Store';
 const store = PiniaStore();
 
 const router = useRouter();
-const showError = ref(false);
+let showError = ref(false);
+let showOTP = ref(false);
+let code = ref('');
+
+const state2 = reactive({
+  char1: '',
+  char2: '',
+  char3: '',
+  char4: '',
+  char5: '',
+  char6: '',
+});
 
 // Inputs
 let state = reactive({
@@ -184,10 +331,16 @@ async function login(e) {
 
       console.log(res.data);
 
-      if (res.status == 200) {
-        store.aktiverUser = res.data.foundUser;
+      if (res.status == 200 && res.data.code == 'kein Admin') {
+        // store.aktiverUser = res.data.foundUser;
+        store.setAktivenUser(res.data.foundUser);
 
-        router.push('/account');
+        router.push('/userMap');
+      } else {
+        code.value = res.data.code;
+        console.log('Code: ', code.value);
+
+        showOTP.value = true;
       }
     } else {
       console.log('Fehler');
@@ -206,6 +359,15 @@ async function login(e) {
   } finally {
     e.preventDefault();
   }
+}
+
+function loginOTP() {
+  if (
+    code.value ==
+    `${state2.char1}${state2.char2}${state2.char3}${state2.char4}${state2.char5}${state2.char6}`
+  ) {
+    router.push('/mitarbeiterMap');
+  } else showError.value = true;
 }
 
 const checkError = computed(() => {

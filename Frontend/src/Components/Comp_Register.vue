@@ -475,7 +475,7 @@
   </div>
 </template>
 
-<script setup>
+<script>
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
 import { MailIcon } from '@heroicons/vue/outline';
 import { XCircleIcon } from '@heroicons/vue/outline';
@@ -522,25 +522,58 @@ const state2 = reactive({
 // Rules for vuelidate
 const rules = computed(() => {
   return {
-    vorname: { required },
-    nachname: { required },
-    email: { required, email },
-    strasse_hnr: { required },
-    stadt: { required },
-    plz: { required, numeric },
-    password: { required, minLength: minLength(6) },
-    c_password: { required, minLength: minLength(6), sameAs: sameAs(state.password) },
+    vorname: {
+      required,
+    },
+    nachname: {
+      required,
+    },
+    email: {
+      required,
+      email,
+    },
+    strasse_hnr: {
+      required,
+    },
+    stadt: {
+      required,
+    },
+    plz: {
+      required,
+      numeric,
+    },
+    password: {
+      required,
+      minLength: minLength(6),
+    },
+    c_password: {
+      required,
+      minLength: minLength(6),
+      sameAs: sameAs(state.password),
+    },
   };
 });
 
 const rules2 = computed(() => {
   return {
-    char1: { required },
-    char2: { required },
-    char3: { required },
-    char4: { required },
-    char5: { required },
-    char6: { required },
+    char1: {
+      required,
+    },
+    char2: {
+      required,
+    },
+    char3: {
+      required,
+    },
+    char4: {
+      required,
+    },
+    char5: {
+      required,
+    },
+    char6: {
+      required,
+    },
   };
 });
 
@@ -619,9 +652,7 @@ async function register() {
     ) {
       await sendImage();
       await sendData();
-    }
-    else
-      alert("Code stimmt nicht überein")
+    } else alert('Code stimmt nicht überein');
   } catch (error) {
     console.log(error);
   }
@@ -667,13 +698,13 @@ async function getCode(e) {
 
 //? ----------------------------------------------------------------
 
-const checkError = computed(() => {
-  return v$.value.$invalid == true ? true : false;
-});
+// const checkError = computed(() => {
+//   return v$.value.$invalid == true ? true : false;
+// });
 
-const checkErrorOTP = computed(() => {
-  return vOTP.value.$invalid == true ? true : false;
-});
+// const checkErrorOTP = computed(() => {
+//   return vOTP.value.$invalid == true ? true : false;
+// });
 
 function felderClearen() {
   state.vorname = '';

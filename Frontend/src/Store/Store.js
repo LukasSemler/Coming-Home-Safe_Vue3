@@ -19,7 +19,14 @@ export const PiniaStore = defineStore('Coming-Home-Safe', {
     aktiverUser: null,
   }),
   //Getter
-  getters: {},
+  getters: {
+    getAktivenUser() {
+      return this.aktiverUser;
+    },
+    isAdmin() {
+      return this.aktiverUser.isAdmin;
+    },
+  },
   //Actions
   actions: {
     setAktivenUser(user) {
