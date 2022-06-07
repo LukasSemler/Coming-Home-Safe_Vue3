@@ -181,11 +181,7 @@
 
   <div class="min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
-      <img
-        class="mx-auto h-12 w-auto"
-        src="/Coming-Home-Safe-Icon.webp"
-        alt="Electronic City"
-      />
+      <img class="mx-auto h-12 w-auto" src="/Coming-Home-Safe-Icon.webp" alt="Electronic City" />
       <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Login</h2>
     </div>
 
@@ -293,7 +289,7 @@ const router = useRouter();
 let showError = ref(false);
 let showOTP = ref(false);
 let code = ref('');
-
+let userVonDB = ref(null);
 const state2 = reactive({
   char1: '',
   char2: '',
@@ -331,10 +327,11 @@ async function login(e) {
       });
 
       console.log(res.data);
+      userVonDB.value = res.data.foundUser;
 
       if (res.status == 200 && res.data.code == 'kein Admin') {
         // store.aktiverUser = res.data.foundUser;
-        store.setAktivenUser(res.data.foundUser);
+        store.setAktivenUser(userVonDB.value);
 
         router.push('/usermap');
       } else {
@@ -367,6 +364,7 @@ function loginOTP() {
     code.value ==
     `${state2.char1}${state2.char2}${state2.char3}${state2.char4}${state2.char5}${state2.char6}`
   ) {
+    store.setAktivenUser(userVonDB.value);
     router.push('/mitarbeiterMap');
   } else showError.value = true;
 }

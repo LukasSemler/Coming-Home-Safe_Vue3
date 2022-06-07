@@ -578,7 +578,7 @@ const rules2 = computed(() => {
 });
 
 const v$ = useValidate(rules, state);
-const vOTP = useValidate(rules2, state2);
+// const vOTP = useValidate(rules2, state2);
 
 //Bild hochladen
 function onFileChanged(event) {
