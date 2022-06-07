@@ -239,7 +239,10 @@
             </div>
 
             <div class="text-sm">
-              <a href="#" class="font-medium text-teal-600 hover:text-teal-500">
+              <a
+                @click="$router.push('/pw_vergessen')"
+                class="font-medium text-teal-600 hover:text-teal-500"
+              >
                 Passwort vergessen ?
               </a>
             </div>

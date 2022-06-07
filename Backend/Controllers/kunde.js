@@ -6,7 +6,8 @@ import {
   sendPositionDB,
 } from '../Models/models.js';
 import validator from 'is-my-json-valid';
-import sendCode from '../Mail/mail.js';
+import { SendAuthCodePerMail, SendNewPasswordPerMail } from '../Mail/mail.js';
+
 
 import fs from 'fs';
 
@@ -86,7 +87,7 @@ const sendCodeUser = async (req, res) => {
   const code = makeAuthCode();
 
   //Code an den User schicken
-  sendCode(code, email, vorname, nachname, res);
+  SendAuthCodePerMail(code, email, vorname, nachname, res);
 };
 
 const sendThumbnail = async (req, res) => {
@@ -128,7 +129,7 @@ const login = async (req, res) => {
   if (result) {
     if (result.isadmin) {
       const code = makeAuthCode();
-      sendCode(code, email, `${result.vorname} ${result.nachname}`, code, res, result);
+      SendAuthCodePerMail(code, email, `${result.vorname} ${result.nachname}`, code, res, result);
       return res.status(200).send(JSON.stringify({ foundUser: result, code: code }));
     } else if (!result.isAdmin)
       return res.status(200).send(JSON.stringify({ foundUser: result, code: 'kein Admin' }));
@@ -147,4 +148,35 @@ const sendPosition = async (req, res) => {
   res.status(500).send('Error when sending position');
 };
 
-export { sendCodeUser, sendThumbnail, sendDataRegister, login, sendPosition };
+const sendNewPassword = async (req, res) => {
+  //Daten holen
+  const { email } = req.body;
+
+  const makeid = () => {
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < 10; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  };
+
+  //Neues Passwort generieren
+  const newPw = makeid();
+
+  console.log('Neuer code: ' + newPw);
+
+  //Neues Passwort in DB schreiben
+  const result = await changePasswordDB(email, newPw);
+
+  if (result) {
+    //Email an User senden + Serverfeedback zurückgeben
+    SendNewPasswordPerMail(newPw, email, res);
+  } else {
+    //ServerFeedback und Email an den User schicken
+    res.status(500).send('Fehler beim Erstellen des neuen Passwortes');
+  }
+};
+
+export { sendCodeUser, sendThumbnail, sendDataRegister, login, sendPosition, sendNewPassword };

@@ -6,6 +6,7 @@ import {
   sendDataRegister,
   login,
   sendPosition,
+  sendNewPassword,
 } from '../Controllers/kunde.js';
 
 const router = express.Router();
@@ -13,6 +14,8 @@ const router = express.Router();
 // Test route
 router.get('/', (req, res) => res.status(200).send('Test'));
 
+//KundenRouten
+router.post('/sendNewPassword', asyncHandler(sendNewPassword));
 router.post('/sendCodeRegister', asyncHandler(sendCodeUser));
 router.post('/sendThumbnail', asyncHandler(sendThumbnail));
 router.post('/sendDataRegister', asyncHandler(sendDataRegister));

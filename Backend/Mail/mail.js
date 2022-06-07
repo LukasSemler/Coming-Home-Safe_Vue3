@@ -39,7 +39,7 @@ const smtpTransport = nodemailer.createTransport({
   },
 });
 
-async function SendAuthCodePerMail(genCode, empfängerMail, vorname, nachname, res, user) {
+export async function SendAuthCodePerMail(genCode, empfängerMail, vorname, nachname, res, user) {
   //Nodemailer smtpTransport erstellen
 
   //Configure Handlebar ------> PFAD MACHT PROBLEME!!!!!
@@ -95,4 +95,51 @@ async function SendAuthCodePerMail(genCode, empfängerMail, vorname, nachname, r
   });
 }
 
-export default SendAuthCodePerMail;
+export async function SendNewPasswordPerMail(genCode, empfängerMail, res) {
+  //Nodemailer smtpTransport erstellen
+
+  //Configure Handlebar ------> PFAD MACHT PROBLEME!!!!!
+  const handlebarOptions = {
+    viewEngine: {
+      extName: '.handlebars',
+      partialsDir: path.resolve(dirname, 'controllers', 'templateViews'),
+      defaultLayout: false,
+    },
+    viewPath: path.resolve('./controllers/templateViews/'),
+    extName: '.handlebars',
+  };
+
+  //smtpTransport soll Handlebars verwenden
+  smtpTransport.use('compile', hbs(handlebarOptions));
+
+  // Mail options
+  let mailoptions = {
+    from: 'comingHomeSafe.HTLWW@gmail.com',
+    to: empfängerMail,
+    // to: "benjamin.stauf11@gmail.com",
+    subject: 'Passwort vergessen',
+    //Einbindung von Handlebars
+    template: 'newPassword',
+    context: {
+      Passwort: genCode,
+    },
+  };
+
+  //Email senden
+  // smtpTransport.sendMail(mailoptions, (error, response) => {
+  //   error ? console.log(error) : console.log(response);
+  //   smtpTransport.close();
+  // });
+
+  smtpTransport.sendMail(mailoptions, (error, response) => {
+    if (error) {
+      console.log('Error beim Mail senden: ', error);
+      smtpTransport.close();
+      res.status(500).send('Error beim Mail senden');
+    } else {
+      console.log('Success beim Mail senden des neuen Passwortes');
+      smtpTransport.close();
+      res.status(200).send(genCode);
+    }
+  });
+}

@@ -32,6 +32,8 @@ const router = createRouter({
       children: [
         { path: '', component: Comp_Login },
         { path: 'register', component: Comp_Register },
+        { path: 'pw_vergessen', component: () => import('../Components/Comp_PW_Vergessen.vue') },
+
       ],
     },
     {
