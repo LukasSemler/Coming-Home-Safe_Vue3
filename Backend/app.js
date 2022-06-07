@@ -6,6 +6,7 @@ import path from 'path';
 import cors from 'cors';
 import fileUpload from 'express-fileupload';
 import { ErrorHandler, NotFoundHandler } from './Middleware/index.js';
+import wsServer from './websockets/index.js';
 
 import routes from './Router/routes.js';
 
@@ -28,6 +29,8 @@ app.use('/', routes);
 app.use(ErrorHandler);
 app.use(NotFoundHandler);
 
-app.listen(PORT, () => {
+const http = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+wsServer(http);
