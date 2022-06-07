@@ -6,6 +6,8 @@ let connections = [];
 function wsServer(httpServer) {
   const wss = new WebSocketServer({ server: httpServer });
   wss.on('connection', (ws) => {
+    console.log('Neuer User hat sich verbunden');
+
     let email = ws._protocol;
     email = email.replace('|', '@');
 
@@ -19,7 +21,7 @@ function wsServer(httpServer) {
     ws.on('message', (data) => {
       const { daten: positionData, type } = JSON.parse(data);
 
-      //console.log('TYPEEEEEE: ' + type);
+      console.log('Message bekommen:');
 
       if (type == 'alarm') {
         console.log('ALARM----------------------------------------------------------------');

@@ -1,10 +1,82 @@
 <template>
+  <TransitionRoot as="template" :show="close">
+    <Dialog as="div" class="relative z-10" @close="close = false">
+      <TransitionChild
+        as="template"
+        enter="ease-out duration-300"
+        enter-from="opacity-0"
+        enter-to="opacity-100"
+        leave="ease-in duration-200"
+        leave-from="opacity-100"
+        leave-to="opacity-0"
+      >
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+      </TransitionChild>
+
+      <div class="fixed z-10 inset-0 overflow-y-auto">
+        <div
+          class="flex items-end sm:items-center justify-center min-h-full p-4 text-center sm:p-0"
+        >
+          <TransitionChild
+            as="template"
+            enter="ease-out duration-300"
+            enter-from="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            enter-to="opacity-100 translate-y-0 sm:scale-100"
+            leave="ease-in duration-200"
+            leave-from="opacity-100 translate-y-0 sm:scale-100"
+            leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+          >
+            <DialogPanel
+              class="relative bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full sm:p-6"
+            >
+              <div>
+                <div
+                  class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100"
+                >
+                  <ExclamationIcon class="h-6 w-6 text-orange-600" aria-hidden="true" />
+                </div>
+                <div class="mt-3 text-center sm:mt-5">
+                  <DialogTitle as="h3" class="text-lg leading-6 font-medium text-gray-900">
+                    Warning
+                  </DialogTitle>
+                  <div class="mt-2">
+                    <p class="text-sm text-gray-500">
+                      Der Tracker ist noch läuft noch. Wenn Sie sich trotzdem abmelden, wird das
+                      Tracking gestoppt.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
+                <button
+                  type="button"
+                  class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 sm:col-start-2 sm:text-sm"
+                  @click="abmelden"
+                >
+                  Akzeptieren
+                </button>
+                <button
+                  type="button"
+                  class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:col-start-1 sm:text-sm"
+                  @click="close = false"
+                  ref="cancelButtonRef"
+                >
+                  Cancle
+                </button>
+              </div>
+            </DialogPanel>
+          </TransitionChild>
+        </div>
+      </div>
+    </Dialog>
+  </TransitionRoot>
+
   <div>
     <div class="flex flex-row justify-end m-3 align-middle">
       <h1 class="text-center text-4xl mt-3 mb-5 mx-4">Tracking</h1>
       <div class="items-center self-center ml-3 mb-1">
         <button
-          @click="abmelden"
+          @click="checkIfTrackerIsStarted"
           type="button"
           class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700"
         >
@@ -27,7 +99,7 @@
         v-if="statusTracking"
         @click="startStopTracker"
         type="button"
-        :class="`inline-flex items-center px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white ${color} ${colorHover} `"
+        :class="`mx-3 inline-flex items-center px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700`"
       >
         Alarm
       </button>
@@ -36,11 +108,16 @@
 </template>
 
 <script setup>
+import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
+import { ExclamationIcon } from '@heroicons/vue/outline';
+
 import mapbox from 'mapbox-gl';
 import { PiniaStore } from '../Store/Store';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+
+let close = ref(false);
 
 const store = PiniaStore();
 const router = useRouter();
@@ -60,6 +137,7 @@ let colorHover = ref('hover:bg-green-500');
 
 let interval = ref(null);
 let mapMarkerListe = ref([]);
+let alarmStarted = ref(false);
 
 onMounted(() => {
   // Karte laden und zentrieren
@@ -108,16 +186,36 @@ async function startStopTracker() {
   if (!statusTracking.value) {
     // Allgemeine Sachen
     statusTracking.value = true;
-    color.value = 'bg-red-500';
-    colorHover.value = 'hover:bg-red-600';
+    color.value = 'bg-fuchsia-600';
+    colorHover.value = 'hover:bg-fuchsia-600';
     statusTrackingButton.value = 'Stop';
 
     interval.value = setInterval(track, 5000);
   } else {
+    // Buttons und so anpassen wenn das Tracking beendet wird
     statusTracking.value = false;
     statusTrackingButton.value = 'Start';
     color.value = 'bg-green-500';
     colorHover.value = 'hover:bg-green-500';
+
+    // Interval stoppen
+    clearInterval(interval.value);
+    interval.value = null;
+
+    // Alle Marker von der Karte entfernen
+    deleteAllMarkers();
+
+    // Route von der Karte entfernen
+    if (alarmStarted.value) {
+      map.value.removeLayer('route');
+      map.value.removeSource('route');
+
+      map.value.removeLayer('point');
+      map.value.removeSource('point');
+
+      map.value.removeLayer('end');
+      map.value.removeSource('end');
+    }
   }
 }
 
@@ -229,8 +327,40 @@ function deleteAllMarkers() {
   });
 }
 
+function checkIfTrackerIsStarted() {
+  if (!statusTracking.value) {
+    store.deleteAktivenUser();
+    router.push('/');
+  } else close.value = true;
+}
+
 function abmelden() {
-  store.deleteAktivenUser();
+  // Buttons und so anpassen wenn das Tracking beendet wird
+  statusTracking.value = false;
+  statusTrackingButton.value = 'Start';
+  color.value = 'bg-green-500';
+  colorHover.value = 'hover:bg-green-500';
+
+  // Interval stoppen
+  clearInterval(interval.value);
+  interval.value = null;
+
+  // Alle Marker von der Karte entfernen
+  deleteAllMarkers();
+
+  // Route von der Karte entfernen
+  if (alarmStarted.value) {
+    map.value.removeLayer('route');
+    map.value.removeSource('route');
+
+    map.value.removeLayer('point');
+    map.value.removeSource('point');
+
+    map.value.removeLayer('end');
+    map.value.removeSource('end');
+  }
+
+  close.value = false;
   router.push('/');
 }
 </script>

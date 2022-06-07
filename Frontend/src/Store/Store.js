@@ -23,6 +23,13 @@ export const PiniaStore = defineStore('Coming-Home-Safe', {
     getAktivenUser() {
       return this.aktiverUser;
     },
+    isAdmin() {
+      try {
+        return this.aktiverUser.isAdmin ? true : false;
+      } catch (error) {
+        return false;
+      }
+    },
   },
   //Actions
   actions: {
