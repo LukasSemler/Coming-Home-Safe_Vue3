@@ -57,7 +57,7 @@ const validateUser = validator({
   },
 });
 
-//Generiert einen Authentifikations-Code
+//Generiert einen Code (Passwort vergessen + Auth-Code)
 let makeAuthCode = (length) => {
   let code = '';
   let auswahl = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
