@@ -70,6 +70,7 @@ let makeAuthCode = (length) => {
   return code;
 };
 
+//Authcode senden für Mitarbeiter & Registrierung
 const sendCodeUser = async (req, res) => {
   console.log('Route wurde aufgerufen');
   const { email, vorname, nachname } = req.body;
@@ -89,6 +90,7 @@ const sendCodeUser = async (req, res) => {
   SendAuthCodePerMail(code, email, vorname, nachname, res);
 };
 
+//Thumbnail setzen und speichern
 const sendThumbnail = async (req, res) => {
   try {
     const { titel, datentyp } = req.body;
@@ -117,6 +119,7 @@ const sendDataRegister = async (req, res) => {
   return res.status(500).send('Fehler beim Registrieren');
 };
 
+//Wenn sich User anmelden will
 const login = async (req, res) => {
   console.log(req.body);
   const { email, password } = req.body;
@@ -137,6 +140,7 @@ const login = async (req, res) => {
   return res.status(500).send('Fehler beim Login');
 };
 
+//Position in DB speichern
 const sendPosition = async (req, res) => {
   const position = req.body;
 
@@ -147,6 +151,7 @@ const sendPosition = async (req, res) => {
   res.status(500).send('Error when sending position');
 };
 
+//Wenn User sein Passwort vergessen hat
 const sendNewPassword = async (req, res) => {
   //Daten holen
   const { email } = req.body;
