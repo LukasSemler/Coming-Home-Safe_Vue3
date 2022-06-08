@@ -8,7 +8,6 @@ import {
 import validator from 'is-my-json-valid';
 import { SendAuthCodePerMail, SendNewPasswordPerMail } from '../Mail/mail.js';
 
-
 import fs from 'fs';
 
 import path from 'path';
@@ -59,12 +58,12 @@ const validateUser = validator({
 });
 
 //Generiert einen Authentifikations-Code
-let makeAuthCode = () => {
+let makeAuthCode = (length) => {
   let code = '';
   let auswahl = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
   //Auth-Code generieren wenn Kunde noch nicht vorhanden
-  for (let index = 0; index < 6; index++) {
+  for (let index = 0; index < length; index++) {
     let rand = Math.round(Math.random() * (auswahl.length - 0));
     code += auswahl[rand];
   }
@@ -84,7 +83,7 @@ const sendCodeUser = async (req, res) => {
   console.log('Vorhanden', vorhanden);
 
   // Code generieren
-  const code = makeAuthCode();
+  const code = makeAuthCode(6);
 
   //Code an den User schicken
   SendAuthCodePerMail(code, email, vorname, nachname, res);
@@ -128,7 +127,7 @@ const login = async (req, res) => {
   //Schauen ob der User ein Admin ist, wenn ja Mail schicken, sonst normal anmelden
   if (result) {
     if (result.isadmin) {
-      const code = makeAuthCode();
+      const code = makeAuthCode(6);
       SendAuthCodePerMail(code, email, `${result.vorname} ${result.nachname}`, code, res, result);
       return res.status(200).send(JSON.stringify({ foundUser: result, code: code }));
     } else if (!result.isAdmin)
@@ -152,20 +151,8 @@ const sendNewPassword = async (req, res) => {
   //Daten holen
   const { email } = req.body;
 
-  const makeid = () => {
-    var result = '';
-    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var charactersLength = characters.length;
-    for (var i = 0; i < 10; i++) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
-  };
-
   //Neues Passwort generieren
-  const newPw = makeid();
-
-  console.log('Neuer code: ' + newPw);
+  const newPw = makeAuthCode(11);
 
   //Neues Passwort in DB schreiben
   const result = await changePasswordDB(email, newPw);
@@ -175,7 +162,7 @@ const sendNewPassword = async (req, res) => {
     SendNewPasswordPerMail(newPw, email, res);
   } else {
     //ServerFeedback und Email an den User schicken
-    res.status(500).send('Fehler beim Erstellen des neuen Passwortes');
+    res.status(210).send('Fehler beim Erstellen des neuen Passwortes');
   }
 };
 

@@ -62,6 +62,12 @@ const loginUser = async (email, password) => {
 
 const changePasswordDB = async (email, password) => {
   const client = await pool.connect();
+
+  const userFoundResult = await checkIfUserExists(email);
+
+  if (!userFoundResult) return null;
+
+  //Passwort changen
   try {
     await client.query('BEGIN');
 
