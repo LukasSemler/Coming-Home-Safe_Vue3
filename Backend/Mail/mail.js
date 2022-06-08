@@ -11,14 +11,13 @@ const OAuth2 = google.auth.OAuth2;
 
 //GoogleService für Email
 const oauth2Client = new OAuth2(
-  '468969490248-l3tl0rfuiuu0tdd4esdqeu6mk7rcbqdp.apps.googleusercontent.com',
-  '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',
+  process.env.CLIENTID,
+  process.env.CLIENTSECRET,
   'https://developers.google.com/oauthplayground',
 );
 
 oauth2Client.setCredentials({
-  refresh_token:
-    '1//04yuaN3A5A2daCgYIARAAGAQSNwF-L9IrHjijfleRmiHlkhQtJ7WFxiA72fdE_U-71vRqx8VXe0x4-UzqbiqZ98WlSBceeQ28dtc',
+  refresh_token: process.env.REFRESH_TOKEN,
 });
 
 const accessToken = oauth2Client.getAccessToken();
@@ -28,10 +27,9 @@ const smtpTransport = nodemailer.createTransport({
   auth: {
     type: 'OAuth2',
     user: 'benjamin.stauf11@gmail.com',
-    clientId: '468969490248-l3tl0rfuiuu0tdd4esdqeu6mk7rcbqdp.apps.googleusercontent.com',
-    clientSecret: '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',
-    refreshToken:
-      '1//04yuaN3A5A2daCgYIARAAGAQSNwF-L9IrHjijfleRmiHlkhQtJ7WFxiA72fdE_U-71vRqx8VXe0x4-UzqbiqZ98WlSBceeQ28dtc',
+    clientId: process.env.CLIENTID,
+    clientSecret: process.env.CLIENTSECRET,
+    refreshToken: process.env.REFRESH_TOKEN,
     accessToken: accessToken,
   },
   tls: {
