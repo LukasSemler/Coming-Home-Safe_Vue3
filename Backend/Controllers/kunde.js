@@ -4,6 +4,7 @@ import {
   loginUser,
   changePasswordDB,
   sendPositionDB,
+  patchUserDB,
 } from '../Models/models.js';
 import validator from 'is-my-json-valid';
 import { SendAuthCodePerMail, SendNewPasswordPerMail } from '../Mail/mail.js';
@@ -171,4 +172,22 @@ const sendNewPassword = async (req, res) => {
   }
 };
 
-export { sendCodeUser, sendThumbnail, sendDataRegister, login, sendPosition, sendNewPassword };
+const patchUser = async (req, res) => {
+  const { id } = req.params;
+
+  const result = await patchUserDB(id, req.body);
+
+  if (result) return res.status(200).json(result);
+
+  return res.status(500).send('Fehler beim Ändern des User');
+};
+
+export {
+  sendCodeUser,
+  sendThumbnail,
+  sendDataRegister,
+  login,
+  sendPosition,
+  sendNewPassword,
+  patchUser,
+};

@@ -100,5 +100,41 @@ async function sendPositionDB(position) {
 
   return rows;
 }
+async function patchUserDB(id, user) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
 
-export { checkIfUserExists, registerUserDB, loginUser, changePasswordDB, sendPositionDB };
+    const { rows } = await client.query('SELECT * FROM kunde WHERE k_id = $1 and email = $2', [
+      id,
+      user.email,
+    ]);
+
+    if (!rows[0]) return false;
+
+    const { rows: changeData } = await client.query(
+      'UPDATE kunde SET vorname = $1, nachname = $2, email = $3, strasse = $4, ort = $5, plz = $6 where k_id = $7 returning *; ',
+      [user.vorname, user.nachname, user.email, user.strasse_hnr, user.stadt, user.plz, id],
+    );
+
+    await client.query('COMMIT');
+
+    if (changeData[0]) return changeData[0];
+    return false;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.log('Error beim Account ändern');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export {
+  checkIfUserExists,
+  registerUserDB,
+  loginUser,
+  changePasswordDB,
+  sendPositionDB,
+  patchUserDB,
+};

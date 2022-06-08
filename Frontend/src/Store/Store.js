@@ -42,5 +42,10 @@ export const PiniaStore = defineStore('Coming-Home-Safe', {
       this.aktiverUser = null;
       SaveState(true);
     },
+    changeAktivenUser(user) {
+      this.aktiverUser = user;
+
+      SaveState();
+    },
   },
 });
