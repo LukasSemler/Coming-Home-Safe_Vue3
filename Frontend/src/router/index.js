@@ -6,6 +6,10 @@ import Comp_Login from '../Components/Comp_Login.vue';
 import Comp_Register from '../Components/Comp_Register.vue';
 import Error404 from '../views/Error_404.vue';
 import UserMap from '../views/UserMap_View.vue';
+import AccountView from '../views/AccountView.vue';
+import SubViewAccount from '../views/Subviews/SubViewAccount.vue';
+import SubViewAccountDelete from '../views/Subviews/SubViewAccountDelete.vue';
+import SubViewChangePW from '../views/Subviews/SubViewChangePW.vue';
 
 import { PiniaStore } from '../Store/Store.js';
 
@@ -33,7 +37,6 @@ const router = createRouter({
         { path: '', component: Comp_Login },
         { path: 'register', component: Comp_Register },
         { path: 'pw_vergessen', component: () => import('../Components/Comp_PW_Vergessen.vue') },
-
       ],
     },
     {
@@ -43,6 +46,24 @@ const router = createRouter({
       beforeEnter: (to, from, next) => {
         const store = PiniaStore();
         if (store.aktiverUser.isadmin) {
+          next();
+        } else {
+          next('/');
+        }
+      },
+    },
+    {
+      path: '/account',
+      name: 'account',
+      component: AccountView,
+      children: [
+        { path: '', component: SubViewAccount },
+        { path: 'password', component: SubViewChangePW },
+        { path: 'deleteAccount', component: SubViewAccountDelete },
+      ],
+      beforeEnter: (to, from, next) => {
+        const store = PiniaStore();
+        if (store.getAktivenUser) {
           next();
         } else {
           next('/');

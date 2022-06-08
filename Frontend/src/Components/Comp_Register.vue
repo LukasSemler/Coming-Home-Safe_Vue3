@@ -703,7 +703,7 @@ async function getCode(e) {
 // });
 
 // const checkErrorOTP = computed(() => {
-//   return vOTP.value.$invalid == true ? true : false;
+//   return vOTP.value.$invalid == true ? true : false; s
 // });
 
 function felderClearen() {
