@@ -8,7 +8,7 @@
           <span class="sr-only">Workflow</span>
           <img
             class="h-12 w-auto"
-            src="../../public/WebsiteIcons/Coming-Home-Safe-Icon.webp"
+            src="/WebsiteIcons/Coming-Home-Safe-Icon.webp"
             alt=""
           />
         </a>
