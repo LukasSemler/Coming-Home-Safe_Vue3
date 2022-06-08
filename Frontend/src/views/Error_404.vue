@@ -6,7 +6,11 @@
       <div class="flex-shrink-0 flex justify-center">
         <a href="/" class="inline-flex">
           <span class="sr-only">Workflow</span>
-          <img class="h-12 w-auto" src="../../public/Coming-Home-Safe-Icon.webp" alt="" />
+          <img
+            class="h-12 w-auto"
+            src="../../public/WebsiteIcons/Coming-Home-Safe-Icon.webp"
+            alt=""
+          />
         </a>
       </div>
       <div class="py-16">

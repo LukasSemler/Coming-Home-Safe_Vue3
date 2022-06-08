@@ -77,7 +77,11 @@
   <!--Standartansicht-->
   <div class="min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
-      <img class="mx-auto h-12 w-auto" src="/Coming-Home-Safe-Icon.webp" alt="Electronic City" />
+      <img
+        class="mx-auto h-12 w-auto"
+        src="/WebsiteIcons/Coming-Home-Safe-Icon.webp"
+        alt="Electronic City"
+      />
       <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Passwort vergessen</h2>
       <h4 class="mx-16 mt-6 text-center text-sm font-small text-gray-900 sm:mx-0">
         Falls du dein Passwort vergessen hast, kannst du hier deinen Account wiederherstellen!

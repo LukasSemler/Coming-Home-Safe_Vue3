@@ -1,34 +1,3 @@
-<script setup>
-import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems,
-} from '@headlessui/vue';
-import { MenuIcon, XIcon } from '@heroicons/vue/outline';
-import { RouterView } from 'vue-router';
-import { onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-
-import { PiniaStore } from './Store/Store.js';
-const store = PiniaStore();
-const router = useRouter();
-
-onMounted(() => {
-  if (localStorage.getItem(store.$id)) {
-    store.$state = JSON.parse(localStorage.getItem(store.$id));
-  }
-});
-
-function abmelden() {
-  store.deleteAktivenUser();
-  router.push('/');
-}
-</script>
-
 <template>
   <Disclosure as="nav" class="bg-white shadow" v-slot="{ open }">
     <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
@@ -47,12 +16,12 @@ function abmelden() {
           <div class="flex-shrink-0 flex items-center">
             <img
               class="block lg:hidden h-8 w-auto"
-              src="/Coming-Home-Safe-Icon.webp"
+              src="/WebsiteIcons/Coming-Home-Safe-Icon.webp"
               alt="Workflow"
             />
             <img
               class="hidden lg:block h-8 w-auto"
-              src="/Coming-Home-Safe-Icon.webp"
+              src="/WebsiteIcons/Coming-Home-Safe-Icon.webp"
               alt="Workflow"
             />
           </div>
@@ -206,4 +175,49 @@ function abmelden() {
   </div>
 </template>
 
-<style></style>
+<script setup>
+import {
+  Disclosure,
+  DisclosureButton,
+  DisclosurePanel,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+} from '@headlessui/vue';
+import { MenuIcon, XIcon } from '@heroicons/vue/outline';
+import { RouterView } from 'vue-router';
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useRegisterSW } from 'virtual:pwa-register/vue';
+
+import { PiniaStore } from './Store/Store.js';
+const store = PiniaStore();
+const router = useRouter();
+
+//PWA
+const { offlineReady, updateServiceWorker, needRefresh } = useRegisterSW();
+
+onMounted(() => {
+  if (localStorage.getItem(store.$id)) {
+    store.$state = JSON.parse(localStorage.getItem(store.$id));
+  }
+
+  console.log(`OfflineReady: ${offlineReady.value}`);
+
+  //Serviceworker onMessage-Event
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    console.log(event.data);
+  });
+
+  //Testconnection mit dem Serviceworker
+  navigator.serviceWorker.register('/service_worker_chs.js').then((registration) => {
+    registration.active.postMessage('HELLO WORLD');
+  });
+});
+
+function abmelden() {
+  store.deleteAktivenUser();
+  router.push('/');
+}
+</script>
