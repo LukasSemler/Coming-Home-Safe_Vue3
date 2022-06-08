@@ -203,8 +203,6 @@ onMounted(() => {
     store.$state = JSON.parse(localStorage.getItem(store.$id));
   }
 
-  console.log(`OfflineReady: ${offlineReady.value}`);
-
   //Serviceworker onMessage-Event
   navigator.serviceWorker.addEventListener('message', (event) => {
     console.log(event.data);
