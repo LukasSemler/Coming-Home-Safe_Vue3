@@ -1,7 +1,7 @@
 import { query, pool } from '../DB/index.js';
 
-const checkIfUserExists = async (email) => {
-  const { rows } = await query('SELECT * FROM kunde WHERE email = $1', [email]);
+const checkIfUserExists = async (id) => {
+  const { rows } = await query('SELECT * FROM kunde WHERE k_id = $1', [id]);
 
   if (rows[0]) return true;
   return false;
@@ -60,10 +60,10 @@ const loginUser = async (email, password) => {
   return false;
 };
 
-const changePasswordDB = async (email, password) => {
+const changePasswordDB = async (id, password) => {
   const client = await pool.connect();
 
-  const userFoundResult = await checkIfUserExists(email);
+  const userFoundResult = await checkIfUserExists(id);
 
   if (!userFoundResult) return null;
 
@@ -71,18 +71,19 @@ const changePasswordDB = async (email, password) => {
   try {
     await client.query('BEGIN');
 
-    const { rows } = await client.query('SELECT * FROM kunde WHERE email = $1', [email]);
+    const { rows } = await client.query('SELECT * FROM kunde WHERE k_id = $1', [id]);
 
     if (!rows[0]) false;
 
     const { rows: change } = await client.query(
-      'UPDATE kunde SET passwort = $1 where email= $2 returning *; ',
-      [password, email],
+      'UPDATE kunde SET passwort = $1 where k_id= $2 returning *; ',
+      [password, id],
     );
 
     await client.query('COMMIT');
     return change[0];
   } catch (error) {
+    await client.query('ROLLBACK');
     console.log(error);
     throw error;
   } finally {
@@ -130,6 +131,10 @@ async function patchUserDB(id, user) {
   }
 }
 
+const deleteUserDB = async (id) => {
+  await query('DELETE FROM kunde where k_id = $1', [id]);
+};
+
 export {
   checkIfUserExists,
   registerUserDB,
@@ -137,4 +142,5 @@ export {
   changePasswordDB,
   sendPositionDB,
   patchUserDB,
+  deleteUserDB,
 };

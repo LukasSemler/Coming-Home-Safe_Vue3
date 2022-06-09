@@ -5,6 +5,7 @@ import {
   changePasswordDB,
   sendPositionDB,
   patchUserDB,
+  deleteUserDB,
 } from '../Models/models.js';
 import validator from 'is-my-json-valid';
 import { SendAuthCodePerMail, SendNewPasswordPerMail } from '../Mail/mail.js';
@@ -182,6 +183,25 @@ const patchUser = async (req, res) => {
   return res.status(500).send('Fehler beim Ändern des User');
 };
 
+const deleteAccount = async (req, res) => {
+  const { id } = req.params;
+
+  await deleteUserDB(id);
+
+  return res.status(200).send('Account erfolgreich gelöscht');
+};
+
+const changePassword = async (req, res) => {
+  const { id } = req.params;
+  const { password } = req.body;
+
+  const result = await changePasswordDB(id, password);
+
+  if (result) return res.status(200).json(result);
+
+  return res.status(500).send('Fehler');
+};
+
 export {
   sendCodeUser,
   sendThumbnail,
@@ -190,4 +210,6 @@ export {
   sendPosition,
   sendNewPassword,
   patchUser,
+  deleteAccount,
+  changePassword,
 };

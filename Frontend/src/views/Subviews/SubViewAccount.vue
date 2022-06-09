@@ -94,14 +94,13 @@
   <main class="relative -mt-32">
     <div class="max-w-screen-xl mx-auto pb-6 px-4 sm:px-6 lg:pb-16 lg:px-8">
       <div class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="divide-y divide-gray-200 lg:grid lg:grid-cols-12 lg:divide-y-0 lg:divide-x">
+        <div class="lg:grid lg:grid-cols-12 lg:divide-y-0 lg:divide-x">
           <aside class="py-6 lg:col-span-3">
             <nav class="space-y-1">
               <a
                 @click="router.push(item.href)"
                 v-for="item in subNavigation"
                 :key="item.name"
-                :href="item.href"
                 :class="[
                   item.current
                     ? 'bg-teal-50 border-teal-500 text-teal-700 hover:bg-teal-50 hover:text-teal-700'
@@ -126,8 +125,8 @@
               </a>
             </nav>
           </aside>
-
-          <div class="divide-gray-200 lg:col-span-9">
+          <hr />
+          <div class="lg:col-span-9 mt-12">
             <h1 class="text-center text-3xl mt-3">Ihr Account</h1>
             <p class="my-3 mb-4 mx-2">
               Hier können Sie die persönlichen Daten von Ihrem Account ändern bzw. aktualisieren
@@ -544,13 +543,13 @@ async function sendData() {
   }
 }
 
-function felderClearen() {
-  state.vorname = '';
-  state.nachname = '';
-  state.email = '';
-  state.strasse_hnr = '';
-  state.stadt = '';
-  state.plz = '';
-  state.telefon = '';
-}
+// function felderClearen() {
+//   state.vorname = '';
+//   state.nachname = '';
+//   state.email = '';
+//   state.strasse_hnr = '';
+//   state.stadt = '';
+//   state.plz = '';
+//   state.telefon = '';
+// }
 </script>

@@ -8,6 +8,8 @@ import {
   sendPosition,
   sendNewPassword,
   patchUser,
+  deleteAccount,
+  changePassword,
 } from '../Controllers/kunde.js';
 
 const router = express.Router();
@@ -24,4 +26,8 @@ router.post('/login', asyncHandler(login));
 router.patch('/patchUser/:id', asyncHandler(patchUser));
 
 router.post('/sendPosition', asyncHandler(sendPosition));
+
+router.delete('/deleteAccount/:id', asyncHandler(deleteAccount));
+
+router.patch('/changePassword/:id', asyncHandler(changePassword));
 export default router;

@@ -361,6 +361,7 @@ function abmelden() {
   }
 
   close.value = false;
+  store.deleteAktivenUser();
   router.push('/');
 }
 </script>
