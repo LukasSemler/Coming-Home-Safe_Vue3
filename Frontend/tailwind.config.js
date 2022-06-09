@@ -8,6 +8,11 @@ module.exports = {
       colors: {
         'warm-gray': colors.stone,
         teal: colors.teal,
+
+        chsBlue: '#12ADC1',
+        chsDarkBlue: '#0295A9',
+        chsYellow: '#FFCB21',
+        chsGray: '#454545',
       },
     },
   },

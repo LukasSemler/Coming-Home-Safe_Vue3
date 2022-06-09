@@ -71,25 +71,75 @@
     </Dialog>
   </TransitionRoot>
 
+  <TransitionRoot as="template" :show="openChat">
+    <Dialog as="div" class="relative z-10" @close="openChat = true">
+      <TransitionChild
+        as="template"
+        enter="ease-in-out duration-500"
+        enter-from="opacity-0"
+        enter-to="opacity-100"
+        leave="ease-in-out duration-500"
+        leave-from="opacity-100"
+        leave-to="opacity-0"
+      >
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+      </TransitionChild>
+
+      <div class="fixed inset-0 overflow-hidden">
+        <div class="absolute inset-0 overflow-hidden">
+          <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+            <TransitionChild
+              as="template"
+              enter="transform transition ease-in-out duration-500 sm:duration-700"
+              enter-from="translate-x-full"
+              enter-to="translate-x-0"
+              leave="transform transition ease-in-out duration-500 sm:duration-700"
+              leave-from="translate-x-0"
+              leave-to="translate-x-full"
+            >
+              <DialogPanel class="pointer-events-auto w-screen max-w-md">
+                <div class="flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-xl">
+                  <div class="px-4 sm:px-6">
+                    <div class="flex items-start justify-between">
+                      <DialogTitle class="text-lg font-medium text-gray-900">
+                        Chat mit einem Mitarbeiter
+                      </DialogTitle>
+                      <div class="ml-3 flex h-7 items-center">
+                        <button
+                          type="button"
+                          class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                          @click="openChat = false"
+                        >
+                          <span class="sr-only">Close panel</span>
+                          <XIcon class="h-6 w-6" aria-hidden="true" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="relative mt-6 flex-1 px-4 sm:px-6">
+                    <!-- Replace with your content -->
+                    <h1>Chat mit einem Mitarbeiter</h1>
+                    <!-- /End replace -->
+                  </div>
+                </div>
+              </DialogPanel>
+            </TransitionChild>
+          </div>
+        </div>
+      </div>
+    </Dialog>
+  </TransitionRoot>
+
   <div>
     <div class="grid grid-cols-3 my-3 mx-2">
       <div></div>
       <div class="flex justify-center">
         <h1 class="text-center text-3xl sm:text-4xl">Tracking</h1>
       </div>
-      <div class="flex justify-end">
-        <button
-          @click="checkIfTrackerIsStarted"
-          type="button"
-          class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700"
-        >
-          Abmelden
-        </button>
-      </div>
     </div>
 
     <!-- Karte -->
-    <div id="map" style="height: 600px"></div>
+    <div id="map" style="height: 500px"></div>
 
     <div class="flex flex-row justify-center m-3">
       <button
@@ -107,13 +157,20 @@
       >
         Alarm
       </button>
+      <button
+        v-if="openChat"
+        type="button"
+        class="inline-flex items-center p-3 border border-transparent rounded-full shadow-sm text-white bg-chsBlue hover:bg-chsDarkBlue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
+      >
+        <ChatIcon class="h-6 w-6" aria-hidden="true" />
+      </button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
-import { ExclamationIcon } from '@heroicons/vue/outline';
+import { ExclamationIcon, ChatIcon, XIcon } from '@heroicons/vue/outline';
 
 import mapbox from 'mapbox-gl';
 import { PiniaStore } from '../Store/Store';
@@ -122,6 +179,7 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 
 let close = ref(false);
+let openChat = ref(true);
 
 const store = PiniaStore();
 const router = useRouter();
@@ -366,14 +424,6 @@ function deleteAllMarkers() {
   mapMarkerListe.value.forEach((element) => {
     element.remove();
   });
-}
-
-//Scahuen ob der Tracker gestartet ist
-function checkIfTrackerIsStarted() {
-  if (!statusTracking.value) {
-    store.deleteAktivenUser();
-    router.push('/');
-  } else close.value = true;
 }
 
 //Abmelden-Button clicked
