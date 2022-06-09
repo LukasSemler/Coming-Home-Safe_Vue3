@@ -72,18 +72,22 @@
   </TransitionRoot>
 
   <div>
-    <div class="flex flex-row justify-end m-3 align-middle">
-      <h1 class="text-center text-4xl mt-3 mb-5 mx-4">Tracking</h1>
-      <div class="items-center self-center ml-3 mb-1">
+    <div class="grid grid-cols-3 my-3 mx-2">
+      <div></div>
+      <div class="flex justify-center">
+        <h1 class="text-center text-3xl sm:text-4xl">Tracking</h1>
+      </div>
+      <div class="flex justify-end">
         <button
           @click="checkIfTrackerIsStarted"
           type="button"
-          class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700"
+          class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700"
         >
           Abmelden
         </button>
       </div>
     </div>
+
     <!-- Karte -->
     <div id="map" style="height: 600px"></div>
 
@@ -113,7 +117,7 @@ import { ExclamationIcon } from '@heroicons/vue/outline';
 
 import mapbox from 'mapbox-gl';
 import { PiniaStore } from '../Store/Store';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, reactive, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
@@ -139,7 +143,10 @@ let interval = ref(null);
 let mapMarkerListe = ref([]);
 let alarmStarted = ref(false);
 
-onMounted(() => {
+let serviceWorkerRegistration = reactive({});
+
+//Beim Usermap-Aufruf
+onMounted(async () => {
   // Karte laden und zentrieren
   centerMap();
   try {
@@ -148,13 +155,25 @@ onMounted(() => {
     console.log('nicht geladen');
   }
 
-  //! Verbindung zum WS aufbauen, nicht sicher ob das geht
-  // connectToWs();
+  //ServiceWorker events abfangen
 
-  // window.addEventListener('onbeforeunload', (event) => {
-  //   //Von Websocket Verbindung trennen
-  //   disconnectFromWs();
-  // });
+  navigator.serviceWorker.addEventListener('message', async (event) => {
+    console.log(event.data);
+  });
+
+  //Zum ServiceWorker verbinden
+  connectToWs();
+
+  window.addEventListener('onbeforeunload', (event) => {
+    //Von Websocket Verbindung trennen
+    disconnectFromWs();
+  });
+});
+
+//Vor dem Usermap schließen
+onBeforeUnmount(() => {
+  //Von Websocket Verbindung trennen
+  disconnectFromWs();
 });
 
 // Funktion um die Karte zu zentrieren
@@ -182,6 +201,7 @@ async function centerMap() {
   });
 }
 
+//Wenn man das Tracking starten/stoppen will
 async function startStopTracker() {
   if (!statusTracking.value) {
     // Allgemeine Sachen
@@ -190,8 +210,26 @@ async function startStopTracker() {
     colorHover.value = 'hover:bg-fuchsia-600';
     statusTrackingButton.value = 'Stop';
 
+    //Tracking auf SW-Seite starten
+    serviceWorkerRegistration.active.postMessage(
+      JSON.stringify({
+        type: 'startTracking',
+        userId: store.getAktivenUser.k_id,
+        payload: 'Kein Payload',
+      }),
+    );
+
     interval.value = setInterval(track, 5000);
   } else {
+    //Tracking auf SW-Seite beenden
+    serviceWorkerRegistration.active.postMessage(
+      JSON.stringify({
+        type: 'endTracking',
+        userId: store.getAktivenUser.k_id,
+        payload: 'Kein Payload',
+      }),
+    );
+
     // Buttons und so anpassen wenn das Tracking beendet wird
     statusTracking.value = false;
     statusTrackingButton.value = 'Start';
@@ -219,6 +257,7 @@ async function startStopTracker() {
   }
 }
 
+//Wenn das Tracking an ist
 async function track() {
   if (navigator.geolocation) {
     //Function gibt aktuelle Coordinaten zurück
@@ -275,15 +314,14 @@ async function track() {
       adresse: standort,
     };
 
-    //! Standortpaket ServiceWorker schicken, der kümmert sich darum
-    // navigator.serviceWorker.ready.then((registration) => {
-    //   registration.active.postMessage(
-    //     JSON.stringify({
-    //       type: 'position',
-    //       payload: position,
-    //     }),
-    //   );
-    // });
+    // Standortpaket ServiceWorker schicken, der kümmert sich darum
+    serviceWorkerRegistration.active.postMessage(
+      JSON.stringify({
+        type: 'tracking',
+        userId: store.getAktivenUser.k_id,
+        payload: position,
+      }),
+    );
 
     //Standort zu der Datenbank senden
     await axios.post('/sendPosition', position);
@@ -292,41 +330,45 @@ async function track() {
   }
 }
 
-function connectToWs() {
-  //ServiceWorker sagen, dass er sich verbinden soll
-  navigator.serviceWorker.ready.then((registration) => {
-    registration.active.postMessage(
-      JSON.stringify({
-        type: 'connect',
-        payload: { wsAdresse: this.ws_serverAdress, email: this.aktiverUser.email },
-      }),
-    );
-  });
+async function connectToWs() {
+  //Client verbindet sich mit SW
+  let registration = await navigator.serviceWorker.getRegistration('/service_worker_chs.js');
 
-  navigator.serviceWorker.addEventListener('message', (event) => {
-    const { type, payload } = JSON.parse(event.data);
+  //VerbindungsMessage zum Websocket schicken
+  registration.active.postMessage(
+    JSON.stringify({
+      type: 'userConnect',
+      userId: store.getAktivenUser.k_id,
+      payload: store.getAktivenUser.email,
+    }),
+  );
 
-    console.log(`Type: ${type} Payload: ${payload}`);
-  });
+  //Variable Zuweisen
+  serviceWorkerRegistration = registration;
 }
 
 function disconnectFromWs() {
-  navigator.serviceWorker.ready.then((registration) => {
-    registration.active.postMessage(
-      JSON.stringify({
-        type: 'disconnect',
-        payload: 'disconnectPayload',
-      }),
-    );
-  });
+  //SW-Verbindng zum Client schließen, wenn sie vorhanden ist.
+  if (!serviceWorkerRegistration) return console.log('ServiceWorker nicht vorhanden');
+
+  //Verbindung schließen
+  serviceWorkerRegistration.active.postMessage(
+    JSON.stringify({
+      type: 'userDisconnect',
+      userId: store.getAktivenUser.k_id,
+      payload: 'kein Payload dabei',
+    }),
+  );
 }
 
+//Alle Marker von der Map zu entfernen
 function deleteAllMarkers() {
   mapMarkerListe.value.forEach((element) => {
     element.remove();
   });
 }
 
+//Scahuen ob der Tracker gestartet ist
 function checkIfTrackerIsStarted() {
   if (!statusTracking.value) {
     store.deleteAktivenUser();
@@ -334,6 +376,7 @@ function checkIfTrackerIsStarted() {
   } else close.value = true;
 }
 
+//Abmelden-Button clicked
 function abmelden() {
   // Buttons und so anpassen wenn das Tracking beendet wird
   statusTracking.value = false;
@@ -360,8 +403,11 @@ function abmelden() {
     map.value.removeSource('end');
   }
 
+  //SW-Verbindung trennen
+  disconnectFromWs();
+
+  //Zum LoginView verbinden
   close.value = false;
-  store.deleteAktivenUser();
   router.push('/');
 }
 </script>

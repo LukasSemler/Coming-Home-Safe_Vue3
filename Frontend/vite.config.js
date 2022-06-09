@@ -1,4 +1,5 @@
 //Url für Pfad
+import path from 'path';
 import { fileURLToPath, URL } from 'url';
 //Vite
 import { defineConfig } from 'vite';
@@ -44,4 +45,8 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  //! DAS WIRD ERST GANZ ZUM SCHLUSS WENN WIR DEPLOYEN AUSKOMMENTIERT, NOCH BRUACHEN WIR DEN .dist-ORDNER (für Preview)
+  // build: {
+  //   outDir: path.resolve(__dirname, '../Backend/public'),
+  // },
 });
