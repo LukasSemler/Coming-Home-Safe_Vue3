@@ -118,8 +118,14 @@
                   </div>
                   <div class="relative mt-6 flex-1 px-4 sm:px-6">
                     <!-- Replace with your content -->
-                    <div class="w-full max-h-96 border-2 border-gray-300 mb-6 overflow-scroll">
-                      <h1 class="ml-2">TEST Nachricht</h1>
+                    <div
+                      class="w-full max-h-96 border-2 border-gray-300 mb-6 overflow-scroll"
+                      v-if="nachrichten.length > 0"
+                    >
+                      <p v-for="(elem, i) of nachrichten" :key="i">
+                        <span class="ml-1 italic font-thin">{{ elem.from }}:</span>
+                        {{ elem.message }}
+                      </p>
                     </div>
                     <!-- INPUT -->
                     <form class="relative">
@@ -154,11 +160,13 @@
                         <!-- Actions: These are just examples to demonstrate the concept, replace/wire these up however makes sense for your project. -->
                         <div class="flex flex-wrap justify-end py-2 px-2 space-x-2 sm:px-3">
                           <span
+                            @click="sendPreset('Ich brauche hilfe')"
                             class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-red-100 text-red-800"
                           >
                             Ich brauche hilfe
                           </span>
                           <span
+                            @click="sendPreset('Alles OK')"
                             class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-green-100 text-green-800"
                           >
                             Alles in Ordnung
@@ -247,7 +255,6 @@ let openChat = ref(false);
 const store = PiniaStore();
 const router = useRouter();
 
-
 let map = ref(null);
 let mapAccessToken = ref(
   'pk.eyJ1IjoiY29taW5naG9tZXNhZmUiLCJhIjoiY2wwN3RzZThnMDF3czNjbzFndnNrZ3h4OCJ9.xuaKaO_7XzSqiIBCAvcT7w',
@@ -271,6 +278,7 @@ let ws = ref(null);
 let wsServerAdress = ref('ws://localhost:2410');
 
 let nachricht = ref('');
+let nachrichten = ref([]);
 
 //Beim Usermap-Aufruf
 onMounted(async () => {
@@ -290,10 +298,17 @@ onMounted(async () => {
   //ServiceWorker Variable vom Store runterladen
   setTimeout(() => ((serviceWorkerRegistration = store.getServiceWorker), 1500));
 
-  //! Websocket Verbindung Überwachen
-  ws.value = new WebSocket(wsServerAdress.value);
+  //! Websocket Verbindung Überwachens
+  let email = store.getAktivenUser.email;
+  email = email.replace('@', '|');
+
+  ws.value = new WebSocket(wsServerAdress.value, email);
   ws.value.onmessage = (data) => {
-    console.log(data);
+    const nachricht = JSON.parse(data.data);
+    console.log(nachricht);
+    if (nachricht.type == 'MessageMitarbeiter') {
+      nachrichten.value.push({ from: 'Mitarbeiter', message: nachricht.data });
+    }
   };
 });
 
@@ -507,9 +522,33 @@ function abmelden() {
   router.push('/');
 }
 
-async function sendMessage(e) {
+function sendMessage(e) {
   e.preventDefault();
 
-  ws.value.send(JSON.stringify({ type: 'Message', daten: nachricht.value }));
+  ws.value.send(
+    JSON.stringify({
+      type: 'MessageUser',
+      daten: nachricht.value,
+      from: store.getAktivenUser.email,
+    }),
+  );
+
+  nachrichten.value.push({ from: 'Ich', message: nachricht.value });
+
+  nachricht.value = '';
+}
+
+async function sendPreset(message) {
+  ws.value.send(
+    JSON.stringify({
+      type: 'MessageUser',
+      daten: message,
+      from: store.getAktivenUser.email,
+    }),
+  );
+
+  nachrichten.value.push({ from: 'Ich', message: message });
+
+  nachricht.value = '';
 }
 </script>

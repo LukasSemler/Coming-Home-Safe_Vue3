@@ -19,7 +19,7 @@ function wsServer(httpServer) {
 
     //Wenn der WebsocketServer Nachrichten bekommt
     ws.on('message', (data) => {
-      const { daten: positionData, type } = JSON.parse(data);
+      const { daten: positionData, type, from, to } = JSON.parse(data);
 
       if (type == 'alarm') {
         console.log('ALARM----------------------------------------------------------------');
@@ -27,14 +27,25 @@ function wsServer(httpServer) {
           elem.ws.send(JSON.stringify({ type: 'alarm', data: positionData })),
         );
       } else if (type == 'sendPosition') {
-        //console.log(`Nachrichtentyp: ${type} --> IM CASE`);
-
         connections.forEach((elem) =>
           elem.ws.send(JSON.stringify({ type: 'getPosition', data: positionData })),
         );
-      } else if (type == 'Message') {
+      } else if (type == 'MessageUser') {
         console.log(type);
         console.log(positionData);
+
+        connections.forEach((elem) =>
+          elem.ws.send(JSON.stringify({ type: 'MessageUser', data: positionData, from: from })),
+        );
+      } else if (type == 'MessageMitarbeiter') {
+        connections.forEach((elem) => {
+          console.log('to: ' + to);
+          console.log('EMAIL', elem.email);
+          console.log(elem);
+          if (elem.email == to) {
+            elem.ws.send(JSON.stringify({ type: 'MessageMitarbeiter', data: positionData }));
+          }
+        });
       }
     });
 
