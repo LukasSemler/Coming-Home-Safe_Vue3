@@ -1,7 +1,7 @@
 import { query, pool } from '../DB/index.js';
 
 const checkIfUserExists = async (id) => {
-  const { rows } = await query('SELECT * FROM kunde WHERE k_id = $1', [id]);
+  const { rows } = await query('SELECT * FROM kunde WHERE email = $1', [id]);
 
   if (rows[0]) return true;
   return false;
@@ -63,20 +63,16 @@ const loginUser = async (email, password) => {
 const changePasswordDB = async (id, password) => {
   const client = await pool.connect();
 
-  const userFoundResult = await checkIfUserExists(id);
-
-  if (!userFoundResult) return null;
-
   //Passwort changen
   try {
     await client.query('BEGIN');
 
-    const { rows } = await client.query('SELECT * FROM kunde WHERE k_id = $1', [id]);
+    const { rows } = await client.query('SELECT * FROM kunde WHERE email = $1', [id]);
 
     if (!rows[0]) false;
 
     const { rows: change } = await client.query(
-      'UPDATE kunde SET passwort = $1 where k_id= $2 returning *; ',
+      'UPDATE kunde SET passwort = $1 where email= $2 returning *; ',
       [password, id],
     );
 
