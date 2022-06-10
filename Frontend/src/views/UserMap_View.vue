@@ -107,7 +107,7 @@
                       <div class="ml-3 flex h-7 items-center">
                         <button
                           type="button"
-                          class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                          class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
                           @click="openChat = false"
                         >
                           <span class="sr-only">Close panel</span>
@@ -118,7 +118,69 @@
                   </div>
                   <div class="relative mt-6 flex-1 px-4 sm:px-6">
                     <!-- Replace with your content -->
-                    <h1>Chat mit einem Mitarbeiter</h1>
+                    <div class="w-full max-h-96 border-2 border-gray-300 mb-6 overflow-scroll">
+                      <h1 class="ml-2">TEST Nachricht</h1>
+                    </div>
+                    <!-- INPUT -->
+                    <form class="relative">
+                      <div
+                        class="border border-gray-300 rounded-lg shadow-sm overflow-hidden focus-within:border-teal-500 focus-within:ring-1 focus-within:ring-teal-500"
+                      >
+                        <label for="description" class="sr-only">Description</label>
+                        <textarea
+                          v-model="nachricht"
+                          rows="2"
+                          name="description"
+                          id="description"
+                          class="block w-full border-0 py-0 resize-none placeholder-gray-500 focus:ring-0 sm:text-sm"
+                          placeholder="Schreiben Sie eine Nachticht"
+                        />
+
+                        <!-- Spacer element to match the height of the toolbar -->
+                        <div aria-hidden="true">
+                          <div class="py-2">
+                            <div class="h-9" />
+                          </div>
+                          <div class="h-px" />
+                          <div class="py-2">
+                            <div class="py-px">
+                              <div class="h-9" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="absolute bottom-0 inset-x-px">
+                        <!-- Actions: These are just examples to demonstrate the concept, replace/wire these up however makes sense for your project. -->
+                        <div class="flex flex-wrap justify-end py-2 px-2 space-x-2 sm:px-3">
+                          <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-red-100 text-red-800"
+                          >
+                            Ich brauche hilfe
+                          </span>
+                          <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-green-100 text-green-800"
+                          >
+                            Alles in Ordnung
+                          </span>
+                          <!-- <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-pink-100 text-pink-800"
+                          >
+                            Badge
+                          </span> -->
+                        </div>
+                        <div
+                          class="border-t border-gray-200 px-2 py-2 flex items-center space-x-3 sm:px-3 justify-end mr-3"
+                        >
+                          <button
+                            @click="sendMessage"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
+                          >
+                            Senden
+                          </button>
+                        </div>
+                      </div>
+                    </form>
                     <!-- /End replace -->
                   </div>
                 </div>
@@ -151,17 +213,17 @@
       </button>
       <button
         v-if="statusTracking"
-        @click="startStopTracker"
+        @click="alarmClicked"
         type="button"
         :class="`mx-3 inline-flex items-center px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700`"
       >
         Alarm
       </button>
       <button
-        v-if="statusTracking"
+        v-if="!statusTracking"
         @click="openChat = true"
         type="button"
-        class="inline-flex items-center p-3 border border-transparent rounded-full shadow-sm text-white bg-chsBlue hover:bg-chsDarkBlue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
+        class="mx-2 inline-flex items-center p-3 border border-transparent rounded-full shadow-sm text-white bg-chsBlue hover:bg-chsDarkBlue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
       >
         <ChatIcon class="h-6 w-6" aria-hidden="true" />
       </button>
@@ -204,6 +266,11 @@ let alarmStarted = ref(false);
 
 let serviceWorkerRegistration = reactive({});
 
+let ws = ref(null);
+let wsServerAdress = ref('ws://localhost:2410');
+
+let nachricht = ref('');
+
 //Beim Usermap-Aufruf
 onMounted(async () => {
   // Karte laden und zentrieren
@@ -227,6 +294,12 @@ onMounted(async () => {
     //Von Websocket Verbindung trennen
     disconnectFromWs();
   });
+
+  //! Websocket Verbindung Überwachen
+  ws.value = new WebSocket(wsServerAdress.value);
+  ws.value.onmessage = (data) => {
+    console.log(data);
+  };
 });
 
 //Vor dem Usermap schließen
@@ -460,5 +533,11 @@ function abmelden() {
   //Zum LoginView verbinden
   close.value = false;
   router.push('/');
+}
+
+async function sendMessage(e) {
+  e.preventDefault();
+
+  ws.value.send(JSON.stringify({ type: 'Message', daten: nachricht.value }));
 }
 </script>

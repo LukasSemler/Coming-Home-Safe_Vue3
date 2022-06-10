@@ -21,8 +21,6 @@ function wsServer(httpServer) {
     ws.on('message', (data) => {
       const { daten: positionData, type } = JSON.parse(data);
 
-      console.log('Message bekommen:');
-
       if (type == 'alarm') {
         console.log('ALARM----------------------------------------------------------------');
       }
@@ -37,6 +35,9 @@ function wsServer(httpServer) {
         connections.forEach((elem) =>
           elem.ws.send(JSON.stringify({ type: 'getPosition', data: positionData })),
         );
+      } else if (type == 'Message') {
+        console.log(type);
+        console.log(positionData);
       }
     });
 
