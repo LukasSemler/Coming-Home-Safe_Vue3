@@ -27,6 +27,7 @@
 var latestTrackingPackage = null;
 var trackingTimer = null;
 var chsWebSocket = null;
+var chsWebSocketConnectionURL = null;
 
 //Message-Funktion
 self.addEventListener('message', (event) => {
@@ -42,8 +43,17 @@ self.addEventListener('message', (event) => {
       //Test-Message
       event.source.postMessage('Hallo User mit der ID ' + userId);
 
+      //Payload beinhaltet diesmal zwei Daten
+      let { email, ws_devMode } = payload;
+
+      console.log('DEVMODE: ' + ws_devMode);
+
+      //Je nach Mode den Websocket-URL bestimmen
+      if (ws_devMode) chsWebSocketConnectionURL = ' ws://localhost:2410';
+      else chsWebSocketConnectionURL = 'wss://coming-home-safe.herokuapp.com';
+
       //Verbindung mit WS herstellen
-      chsWebSocket = new WebSocket('ws://localhost:2410', payload.replace('@', '|'));
+      chsWebSocket = new WebSocket(chsWebSocketConnectionURL, email.replace('@', '|'));
 
       break;
 

@@ -291,6 +291,9 @@ import { required, email } from '@vuelidate/validators';
 import { PiniaStore } from '../Store/Store';
 const store = PiniaStore();
 
+//* MUSS IMMER UMGESTELLT WERDEN WENN MAN DEPLOYED
+let devmode = ref(true);
+
 const router = useRouter();
 let showError = ref(false);
 let showOTP = ref(false);
@@ -339,6 +342,9 @@ async function login(e) {
         // store.aktiverUser = res.data.foundUser;
         store.setAktivenUser(userVonDB.value);
 
+        //Kunde mit ServiceWorker verbinden + übergabe ob DEV true oder false ist
+        store.connectToServiceWorker(devmode.value);
+
         router.push('/usermap');
       } else {
         code.value = res.data.code;
@@ -371,6 +377,10 @@ function loginOTP() {
     `${state2.char1}${state2.char2}${state2.char3}${state2.char4}${state2.char5}${state2.char6}`
   ) {
     store.setAktivenUser(userVonDB.value);
+
+    //TODO Mitarbeiter mit ServiceWorker verbinden --> Glaube da können noch Fehler auftreten (Benni macht das)
+    store.connectToServiceWorker(devmode.value);
+
     router.push('/mitarbeiterMap');
   } else showError.value = true;
 }

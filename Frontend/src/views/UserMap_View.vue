@@ -237,15 +237,16 @@ import { ExclamationIcon, ChatIcon, XIcon } from '@heroicons/vue/outline';
 
 import mapbox from 'mapbox-gl';
 import { PiniaStore } from '../Store/Store';
-import { ref, onMounted, reactive, onBeforeUnmount } from 'vue';
+import { ref, onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
 let close = ref(false);
-let openChat = ref(true);
+let openChat = ref(false);
 
 const store = PiniaStore();
 const router = useRouter();
+
 
 let map = ref(null);
 let mapAccessToken = ref(
@@ -282,30 +283,18 @@ onMounted(async () => {
   }
 
   //ServiceWorker events abfangen
-
   navigator.serviceWorker.addEventListener('message', async (event) => {
     console.log(event.data);
   });
 
-  //Zum ServiceWorker verbinden
-  connectToWs();
-
-  window.addEventListener('onbeforeunload', (event) => {
-    //Von Websocket Verbindung trennen
-    disconnectFromWs();
-  });
+  //ServiceWorker Variable vom Store runterladen
+  setTimeout(() => ((serviceWorkerRegistration = store.getServiceWorker), 1500));
 
   //! Websocket Verbindung Überwachen
   ws.value = new WebSocket(wsServerAdress.value);
   ws.value.onmessage = (data) => {
     console.log(data);
   };
-});
-
-//Vor dem Usermap schließen
-onBeforeUnmount(() => {
-  //Von Websocket Verbindung trennen
-  disconnectFromWs();
 });
 
 // Funktion um die Karte zu zentrieren
@@ -335,6 +324,8 @@ async function centerMap() {
 
 //Wenn man das Tracking starten/stoppen will
 async function startStopTracker() {
+  serviceWorkerRegistration = store.getServiceWorker;
+
   if (!statusTracking.value) {
     // Allgemeine Sachen
     statusTracking.value = true;
@@ -462,33 +453,14 @@ async function track() {
   }
 }
 
-async function connectToWs() {
-  //Client verbindet sich mit SW
-  let registration = await navigator.serviceWorker.getRegistration('/service_worker_chs.js');
-
-  //VerbindungsMessage zum Websocket schicken
-  registration.active.postMessage(
-    JSON.stringify({
-      type: 'userConnect',
-      userId: store.getAktivenUser.k_id,
-      payload: store.getAktivenUser.email,
-    }),
-  );
-
-  //Variable Zuweisen
-  serviceWorkerRegistration = registration;
-}
-
-function disconnectFromWs() {
-  //SW-Verbindng zum Client schließen, wenn sie vorhanden ist.
-  if (!serviceWorkerRegistration) return console.log('ServiceWorker nicht vorhanden');
-
-  //Verbindung schließen
+//Wenn man auf den Alarm-Button clickt
+function alarmClicked() {
+  //Befehl an ServiceWorker senden, um Alarm zu setzen
   serviceWorkerRegistration.active.postMessage(
     JSON.stringify({
-      type: 'userDisconnect',
+      type: 'setAlarm',
       userId: store.getAktivenUser.k_id,
-      payload: 'kein Payload dabei',
+      payload: store.getAktivenUser,
     }),
   );
 }
@@ -528,7 +500,7 @@ function abmelden() {
   }
 
   //SW-Verbindung trennen
-  disconnectFromWs();
+  store.disconnectFromServiceWorker();
 
   //Zum LoginView verbinden
   close.value = false;

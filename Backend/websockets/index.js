@@ -23,9 +23,6 @@ function wsServer(httpServer) {
 
       if (type == 'alarm') {
         console.log('ALARM----------------------------------------------------------------');
-      }
-
-      if (type == 'alarm') {
         connections.forEach((elem) =>
           elem.ws.send(JSON.stringify({ type: 'alarm', data: positionData })),
         );
@@ -61,6 +58,7 @@ function wsServer(httpServer) {
   });
 }
 
+//Testausgabe, damit man immer die Anzahl der aktiven User bekommt
 // setInterval(() => {
 //   console.log('Länge: ' + connections.length);
 // }, 3000);

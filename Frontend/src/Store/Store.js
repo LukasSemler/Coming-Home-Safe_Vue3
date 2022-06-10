@@ -17,6 +17,7 @@ export const PiniaStore = defineStore('Coming-Home-Safe', {
   //State
   state: () => ({
     aktiverUser: null,
+    userServiceWorker: null,
   }),
   //Getter
   getters: {
@@ -29,6 +30,9 @@ export const PiniaStore = defineStore('Coming-Home-Safe', {
       } catch (error) {
         return false;
       }
+    },
+    getServiceWorker(state) {
+      return state.userServiceWorker;
     },
   },
   //Actions
@@ -46,6 +50,40 @@ export const PiniaStore = defineStore('Coming-Home-Safe', {
       this.aktiverUser = user;
 
       SaveState();
+    },
+
+    //---------ServiceWorker----------
+    async connectToServiceWorker(ws_devMode) {
+      //Client verbindet sich mit SW
+      let registration = await navigator.serviceWorker.getRegistration('/service_worker_chs.js');
+
+      //VerbindungsMessage zum Websocket schicken
+      registration.active.postMessage(
+        JSON.stringify({
+          type: 'userConnect',
+          userId: this.getAktivenUser.k_id,
+          payload: { email: this.getAktivenUser.email, ws_devMode },
+        }),
+      );
+
+      this.userServiceWorker = registration;
+    },
+
+    async disconnectFromServiceWorker() {
+      if (!this.userServiceWorker) return console.log('ServiceWorker nicht vorhanden');
+
+      //Verbindung schließen
+      this.userServiceWorker.active.postMessage(
+        JSON.stringify({
+          type: 'userDisconnect',
+          userId: this.getAktivenUser.k_id,
+          payload: 'kein Payload dabei',
+        }),
+      );
+
+      await this.userServiceWorker.unregister();
+
+      this.userServiceWorker = null;
     },
   },
 });

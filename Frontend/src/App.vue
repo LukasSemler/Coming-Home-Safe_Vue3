@@ -140,7 +140,12 @@ onMounted(async () => {
 });
 
 function abmelden() {
+  //User vom ServiceWorker abmelden
+  store.disconnectFromServiceWorker();
+
+  //Eingeloggten User im Store entfernen
   store.deleteAktivenUser();
+
   router.push('/');
 }
 </script>
