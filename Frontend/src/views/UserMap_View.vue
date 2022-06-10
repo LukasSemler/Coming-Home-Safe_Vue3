@@ -158,7 +158,8 @@
         Alarm
       </button>
       <button
-        v-if="openChat"
+        v-if="statusTracking"
+        @click="openChat = true"
         type="button"
         class="inline-flex items-center p-3 border border-transparent rounded-full shadow-sm text-white bg-chsBlue hover:bg-chsDarkBlue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
       >
