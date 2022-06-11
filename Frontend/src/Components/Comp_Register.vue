@@ -41,11 +41,6 @@
                     2 Faktoren Bestätigung
                   </DialogTitle>
                   <div class="mt-2">
-                    <p class="text-sm text-gray-500 mb-3">
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit. Eveniet assumenda
-                      fuga ducimus debitis esse impedit dolor
-                    </p>
-
                     <hr />
 
                     <div class="flex flex-col mt-6">
@@ -56,44 +51,44 @@
                     </div>
 
                     <div id="otp" class="flex flex-row justify-center text-center px-2 mt-5">
-                      <input
+                     <input
                         v-model="state2.char1"
-                        class="m-2 border h-10 w-10 text-center form-control rounded"
+                        class="m-2 border h-10 w-10 text-center form-control rounded focus:border-teal-600 focus:ring-teal-600"
                         type="text"
                         id="first"
                         maxlength="1"
                       />
                       <input
                         v-model="state2.char2"
-                        class="m-2 border h-10 w-10 text-center form-control rounded"
+                        class="m-2 border h-10 w-10 text-center form-control rounded focus:border-teal-600 focus:ring-teal-600"
                         type="text"
                         id="second"
                         maxlength="1"
                       />
                       <input
                         v-model="state2.char3"
-                        class="m-2 border h-10 w-10 text-center form-control rounded"
+                        class="m-2 border h-10 w-10 text-center form-control rounded focus:border-teal-600 focus:ring-teal-600"
                         type="text"
                         id="third"
                         maxlength="1"
                       />
                       <input
                         v-model="state2.char4"
-                        class="m-2 border h-10 w-10 text-center form-control rounded"
+                        class="m-2 border h-10 w-10 text-center form-control rounded focus:border-teal-600 focus:ring-teal-600"
                         type="text"
                         id="fourth"
                         maxlength="1"
                       />
                       <input
                         v-model="state2.char5"
-                        class="m-2 border h-10 w-10 text-center form-control rounded"
+                        class="m-2 border h-10 w-10 text-center form-control rounded focus:border-teal-600 focus:ring-teal-600"
                         type="text"
                         id="fifth"
                         maxlength="1"
                       />
                       <input
                         v-model="state2.char6"
-                        class="m-2 border h-10 w-10 text-center form-control rounded"
+                        class="m-2 border h-10 w-10 text-center form-control rounded focus:border-teal-600 focus:ring-teal-600"
                         type="text"
                         id="sixth"
                         maxlength="1"

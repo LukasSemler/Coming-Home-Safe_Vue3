@@ -8,11 +8,12 @@ function wsServer(httpServer) {
   wss.on('connection', (ws) => {
     console.log('Neuer User hat sich verbunden');
 
+    //Verbundenen User anpassen und in Array speichern
     let email = ws._protocol;
     email = email.replace('|', '@');
-
     connections.push({ ws, email });
-
+    
+    //Alle Aktiven User an alle User senden
     connections.forEach((elem) => {
       elem.ws.send(JSON.stringify({ type: 'newConnection', data: email }));
     });
@@ -20,24 +21,29 @@ function wsServer(httpServer) {
     //Wenn der WebsocketServer Nachrichten bekommt
     ws.on('message', (data) => {
       const { daten: positionData, type, from, to } = JSON.parse(data);
-
+      //------ALARM------
       if (type == 'alarm') {
         console.log('ALARM----------------------------------------------------------------');
         connections.forEach((elem) =>
           elem.ws.send(JSON.stringify({ type: 'alarm', data: positionData })),
         );
-      } else if (type == 'sendPosition') {
+      } 
+      //
+      else if (type == 'sendPosition') {
         connections.forEach((elem) =>
           elem.ws.send(JSON.stringify({ type: 'getPosition', data: positionData })),
         );
-      } else if (type == 'MessageUser') {
+      } 
+      //-----MESSAGE------
+      else if (type == 'MessageUser') {
         console.log(type);
         console.log(positionData);
 
         connections.forEach((elem) =>
           elem.ws.send(JSON.stringify({ type: 'MessageUser', data: positionData, from: from })),
         );
-      } else if (type == 'MessageMitarbeiter') {
+      } 
+      else if (type == 'MessageMitarbeiter') {
         connections.forEach((elem) => {
           console.log('to: ' + to);
           console.log('EMAIL', elem.email);

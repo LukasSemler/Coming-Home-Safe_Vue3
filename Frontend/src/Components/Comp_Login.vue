@@ -40,11 +40,6 @@
                     2 Faktoren Bestätigung
                   </DialogTitle>
                   <div class="mt-2">
-                    <p class="text-sm text-gray-500 mb-3">
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit. Eveniet assumenda
-                      fuga ducimus debitis esse impedit dolor
-                    </p>
-
                     <hr />
 
                     <div class="flex flex-col mt-6">
@@ -57,42 +52,42 @@
                     <div id="otp" class="flex flex-row justify-center text-center px-2 mt-5">
                       <input
                         v-model="state2.char1"
-                        class="m-2 border h-10 w-10 text-center form-control rounded"
+                        class="m-2 border h-10 w-10 text-center form-control rounded focus:border-teal-600 focus:ring-teal-600"
                         type="text"
                         id="first"
                         maxlength="1"
                       />
                       <input
                         v-model="state2.char2"
-                        class="m-2 border h-10 w-10 text-center form-control rounded"
+                        class="m-2 border h-10 w-10 text-center form-control rounded focus:border-teal-600 focus:ring-teal-600"
                         type="text"
                         id="second"
                         maxlength="1"
                       />
                       <input
                         v-model="state2.char3"
-                        class="m-2 border h-10 w-10 text-center form-control rounded"
+                        class="m-2 border h-10 w-10 text-center form-control rounded focus:border-teal-600 focus:ring-teal-600"
                         type="text"
                         id="third"
                         maxlength="1"
                       />
                       <input
                         v-model="state2.char4"
-                        class="m-2 border h-10 w-10 text-center form-control rounded"
+                        class="m-2 border h-10 w-10 text-center form-control rounded focus:border-teal-600 focus:ring-teal-600"
                         type="text"
                         id="fourth"
                         maxlength="1"
                       />
                       <input
                         v-model="state2.char5"
-                        class="m-2 border h-10 w-10 text-center form-control rounded"
+                        class="m-2 border h-10 w-10 text-center form-control rounded focus:border-teal-600 focus:ring-teal-600"
                         type="text"
                         id="fifth"
                         maxlength="1"
                       />
                       <input
                         v-model="state2.char6"
-                        class="m-2 border h-10 w-10 text-center form-control rounded"
+                        class="m-2 border h-10 w-10 text-center form-control rounded focus:border-teal-600 focus:ring-teal-600"
                         type="text"
                         id="sixth"
                         maxlength="1"
@@ -104,7 +99,7 @@
               <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
                 <button
                   type="button"
-                  class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:col-start-2 sm:text-sm"
+                  class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-teal-600 text-base font-medium text-white hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 sm:col-start-2 sm:text-sm"
                   @click="loginOTP"
                 >
                   Verifizieren
@@ -119,7 +114,7 @@
                 </button> -->
                 <button
                   type="button"
-                  class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-1 sm:text-sm"
+                  class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 sm:mt-0 sm:col-start-1 sm:text-sm"
                   @click="showOTP = false"
                   ref="cancelButtonRef"
                 >
@@ -348,7 +343,7 @@ async function login(e) {
         router.push('/usermap');
       } else {
         code.value = res.data.code;
-        console.log('Code: ', code.value);
+        console.log('Code: ', code.value);     
 
         showOTP.value = true;
       }
