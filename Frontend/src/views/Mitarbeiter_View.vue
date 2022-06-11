@@ -30,7 +30,7 @@
                   <div class="px-4 sm:px-6">
                     <div class="flex items-start justify-between">
                       <DialogTitle class="text-lg font-medium text-gray-900">
-                        Chat mit einem Mitarbeiter
+                        Schreibe mit einem User
                       </DialogTitle>
                       <div class="ml-3 flex h-7 items-center">
                         <button
@@ -124,23 +124,59 @@
   </div>
   <!-- Karte -->
   <div id="map" style="height: 600px"></div>
-  <button
-    @click="openChat = true"
-    type="button"
-    class="mx-2 inline-flex items-center p-3 border border-transparent rounded-full shadow-sm text-white bg-chsBlue hover:bg-chsDarkBlue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
-  >
-    <ChatIcon class="h-6 w-6" aria-hidden="true" />
-  </button>
-  <ul v-for="(nachricht, i) of nachrichten" :key="i">
-    {{
-      nachricht
-    }}
+
+  <!-- User anzeigen -->
+  <h1 class="text-center text-3xl font-bold my-4" v-if="people.length > 0">Aktive User</h1>
+  <h1 class="text-center text-3xl font-bold my-4" v-else>Momentan ist kein User aktiv</h1>
+
+  <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mx-3">
+    <li
+      v-for="person in people"
+      :key="person.email"
+      class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200"
+    >
+      <div class="flex-1 flex flex-col p-8">
+        <img class="w-32 h-32 flex-shrink-0 mx-auto rounded-full" :src="person.imageUrl" alt="" />
+        <h3 class="mt-6 text-gray-900 text-sm font-medium">{{ person.name }}</h3>
+        <dl class="mt-1 flex-grow flex flex-col justify-between">
+          <dt class="sr-only">Title</dt>
+          <dd class="text-gray-500 text-sm">{{ person.title }}</dd>
+          <dt class="sr-only">Role</dt>
+          <dd class="mt-3">
+            <span class="px-2 py-1 text-green-800 text-xs font-medium bg-green-100 rounded-full">{{
+              person.role
+            }}</span>
+          </dd>
+        </dl>
+      </div>
+      <div>
+        <div class="-mt-px flex divide-x divide-gray-200">
+          <div class="w-0 flex-1 flex">
+            <p
+              class="relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-bl-lg hover:text-gray-500"
+            >
+              <MapIcon class="w-5 h-5 text-gray-400" aria-hidden="true"></MapIcon>
+              <span class="ml-3">Show on Map</span>
+            </p>
+          </div>
+          <div class="-ml-px w-0 flex-1 flex">
+            <p
+              @click="openChat = true"
+              class="relative w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-br-lg hover:text-gray-500"
+            >
+              <ChatIcon class="h-6 w-6" aria-hidden="true" />
+              <span class="ml-3">Chat</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </li>
   </ul>
 </template>
 
 <script setup>
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
-import { ChatIcon, XIcon } from '@heroicons/vue/outline';
+import { ChatIcon, XIcon, MapIcon } from '@heroicons/vue/outline';
 
 import mapbox from 'mapbox-gl';
 import { ref, onMounted } from 'vue';
@@ -151,6 +187,56 @@ const store = PiniaStore();
 const router = useRouter();
 
 let openChat = ref(false);
+
+let aktiveUser = ref([]);
+
+const people = [
+  {
+    name: 'Jane Cooper',
+    title: 'Paradigm Representative',
+    role: 'Admin',
+    email: 'janecooper@example.com',
+    telephone: '+1-202-555-0170',
+    imageUrl:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60',
+  },
+  {
+    name: 'Jane Cooper',
+    title: 'Paradigm Representative',
+    role: 'Admin',
+    email: 'janecooper@example.com',
+    telephone: '+1-202-555-0170',
+    imageUrl:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60',
+  },
+  {
+    name: 'Jane Cooper',
+    title: 'Paradigm Representative',
+    role: 'Admin',
+    email: 'janecooper@example.com',
+    telephone: '+1-202-555-0170',
+    imageUrl:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60',
+  },
+  {
+    name: 'Jane Cooper',
+    title: 'Paradigm Representative',
+    role: 'Admin',
+    email: 'janecooper@example.com',
+    telephone: '+1-202-555-0170',
+    imageUrl:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60',
+  },
+  {
+    name: 'Jane Cooper',
+    title: 'Paradigm Representative',
+    role: 'Admin',
+    email: 'janecooper@example.com',
+    telephone: '+1-202-555-0170',
+    imageUrl:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60',
+  },
+];
 
 let map = ref(null);
 let mapAccessToken =
