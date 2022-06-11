@@ -31,7 +31,8 @@
                   <div class="px-4 sm:px-6">
                     <div class="flex items-start justify-between">
                       <DialogTitle class="text-lg font-medium text-gray-900">
-                        Schreibe mit einem User
+                        Schreibe mit {{ aktiverUserChat.user.vorname }}
+                        {{ aktiverUserChat.user.nachname }}
                       </DialogTitle>
                       <div class="ml-3 flex h-7 items-center">
                         <button
@@ -118,7 +119,7 @@
   <div id="map" style="height: 600px"></div>
 
   <!-- User anzeigen -->
-  <h1 class="text-center text-3xl font-bold my-4" v-if="kunderArray.length > 0">Aktive User</h1>
+  <h1 class="text-center text-3xl font-bold my-4" v-if="kundenArrayWS.length > 0">Aktive User</h1>
   <h1 class="text-center text-3xl font-bold my-4" v-else>Momentan ist kein User aktiv</h1>
 
   <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mx-3">
@@ -129,6 +130,8 @@
     >
       <div class="flex-1 flex flex-col p-8">
         <img
+          async
+          crossorigin="anonymous"
           class="w-32 h-32 flex-shrink-0 mx-auto rounded-full"
           :src="kundenItem.user.link_thumbnail"
           alt=""
@@ -141,7 +144,10 @@
           <dd class="text-gray-500 text-sm">{{ kundenItem.title }}</dd>
           <dt class="sr-only">Role</dt> -->
           <dd class="mt-3">
-            <span class="px-3 py-1 text-xs font-medium rounded-full" :style="'background-color:'+ kundenItem.userfarbe"></span>
+            <span
+              class="px-3 py-1 text-xs font-medium rounded-full"
+              :style="'background-color:' + kundenItem.userfarbe"
+            ></span>
           </dd>
         </dl>
       </div>
@@ -158,7 +164,7 @@
           </div>
           <div class="-ml-px w-0 flex-1 flex">
             <p
-              @click="openChat = true"
+              @click="openChatWindow(kundenItem.user.email)"
               class="relative w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-br-lg hover:text-gray-500 cursor-pointer"
             >
               <ChatIcon class="h-6 w-6" aria-hidden="true" />
@@ -178,60 +184,13 @@ import { ChatIcon, XIcon, MapIcon } from '@heroicons/vue/outline';
 import mapbox from 'mapbox-gl';
 import { ref, onMounted } from 'vue';
 import { PiniaStore } from '../Store/Store.js';
-import { useRouter } from 'vue-router';
+// import { useRouter } from 'vue-router';
 
 const store = PiniaStore();
-const router = useRouter();
+// const router = useRouter();
 
 let openChat = ref(false);
-
-const kunderArray = [
-  {
-    name: 'Jane Cooper',
-    title: 'Paradigm Representative',
-    role: 'Admin',
-    email: 'janecooper@example.com',
-    telephone: '+1-202-555-0170',
-    imageUrl:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60',
-  },
-  {
-    name: 'Jane Cooper',
-    title: 'Paradigm Representative',
-    role: 'Admin',
-    email: 'janecooper@example.com',
-    telephone: '+1-202-555-0170',
-    imageUrl:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60',
-  },
-  {
-    name: 'Jane Cooper',
-    title: 'Paradigm Representative',
-    role: 'Admin',
-    email: 'janecooper@example.com',
-    telephone: '+1-202-555-0170',
-    imageUrl:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60',
-  },
-  {
-    name: 'Jane Cooper',
-    title: 'Paradigm Representative',
-    role: 'Admin',
-    email: 'janecooper@example.com',
-    telephone: '+1-202-555-0170',
-    imageUrl:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60',
-  },
-  {
-    name: 'Jane Cooper',
-    title: 'Paradigm Representative',
-    role: 'Admin',
-    email: 'janecooper@example.com',
-    telephone: '+1-202-555-0170',
-    imageUrl:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60',
-  },
-];
+let aktiverUserChat = ref(null);
 
 let kundenArrayWS = ref([]);
 let mapMarkerListe = ref([]);
@@ -273,7 +232,8 @@ onMounted(async () => {
 
     const from = message.from;
     if (message.type == 'MessageUser') {
-      nachrichten.value.push({ message: message.data, from });
+      let found = kundenArrayWS.value.find((kunde) => kunde.user.email == from);
+      found.nachrichten.push({ message: message.data, from });
     }
     //Wenn sich User tracken lassen
     else if (message.type == 'getPosition') {
@@ -289,6 +249,7 @@ onMounted(async () => {
         kundenArrayWS.value.push({
           ...message.data,
           userfarbe: '#' + Math.floor(Math.random() * 16777215).toString(16),
+          nachrichten: [],
         });
       }
       //Die Daten akutellisieren
@@ -374,5 +335,15 @@ function showUserOnMap(kundenItem) {
     center: [kundenItem.lng, kundenItem.lat],
     zoom: 13,
   });
+}
+
+function openChatWindow(user) {
+  console.log('User: ', user);
+  aktiverUserChat.value = kundenArrayWS.value.find((kunde) => kunde.user.email == user);
+  console.log(aktiverUserChat.value);
+
+  nachrichten.value = aktiverUserChat.value.nachrichten;
+
+  openChat.value = true;
 }
 </script>
