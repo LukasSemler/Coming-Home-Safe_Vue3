@@ -28,6 +28,7 @@
     "nodemailer-express-handlebars": "^5.0.0",
     "nodemon": "^2.0.15",
     "pg": "^8.7.3",
+    "postmark": "^3.0.12",
     "ws": "^8.7.0"
   },
   "devDependencies": {

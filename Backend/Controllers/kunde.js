@@ -8,13 +8,17 @@ import {
   deleteUserDB,
 } from '../Models/models.js';
 import validator from 'is-my-json-valid';
-import { SendAuthCodePerMail, SendNewPasswordPerMail } from '../Mail/mail.js';
+// import { SendAuthCodePerMail, SendNewPasswordPerMail } from '../Mail/mail.js';
+import postmark from 'postmark';
+import dotenv from 'dotenv';
 
 import fs from 'fs';
-
 import path from 'path';
 
+dotenv.config();
+
 const dirname = path.resolve();
+const emailClient = new postmark.ServerClient(process.env.postmarkToken);
 
 const validateUser = validator({
   required: true,
@@ -87,9 +91,25 @@ const sendCodeUser = async (req, res) => {
 
   // Code generieren
   const code = makeAuthCode(6);
+  console.log(code);
 
   //Code an den User schicken
-  SendAuthCodePerMail(code, email, vorname, nachname, res);
+  //TODO postmark einbinden
+  emailClient.sendEmailWithTemplate({
+    From: 'semler.l04@htlwienwest.at',
+    To: email,
+    TemplateAlias: 'faktor',
+    TemplateModel: {
+      vorname: vorname,
+      nachname: nachname,
+      product_name: 'Coming Home Safe',
+      code: code,
+      company_name: 'Coming Home Safe',
+      company_address: 'Thaliastraße 125',
+    },
+  });
+
+  res.status(200).send(code);
 };
 
 //Thumbnail setzen und speichern
@@ -133,7 +153,21 @@ const login = async (req, res) => {
   if (result) {
     if (result.isadmin) {
       const code = makeAuthCode(6);
-      SendAuthCodePerMail(code, email, `${result.vorname} ${result.nachname}`, code, res, result);
+      // SendAuthCodePerMail(code, email, `${result.vorname} ${result.nachname}`, code, res, result);
+      //TODO postmark einbinden
+      emailClient.sendEmailWithTemplate({
+        From: 'semler.l04@htlwienwest.at',
+        To: email,
+        TemplateAlias: 'faktor-mitarbeiter',
+        TemplateModel: {
+          vorname: result.vorname,
+          nachname: result.nachname,
+          product_name: 'Coming Home Safe',
+          code: code,
+          company_name: 'Coming Home Safe',
+          company_address: 'Thaliastraße 125',
+        },
+      });
       return res.status(200).send(JSON.stringify({ foundUser: result, code: code }));
     } else if (!result.isAdmin)
       return res.status(200).send(JSON.stringify({ foundUser: result, code: 'kein Admin' }));
@@ -166,7 +200,18 @@ const sendNewPassword = async (req, res) => {
 
   if (result) {
     //Email an User senden + Serverfeedback zurückgeben
-    SendNewPasswordPerMail(newPw, email, res);
+    //TODO postmark einbinden
+    emailClient.sendEmailWithTemplate({
+      From: 'semler.l04@htlwienwest.at',
+      To: email,
+      TemplateAlias: 'passwort-reset',
+      TemplateModel: {
+        product_name: 'Coming-Home-Safe',
+        company_name: 'Coming-Home-Safe',
+        company_address: 'Thaliastraße 125',
+        password: newPw,
+      },
+    });
   } else {
     //ServerFeedback und Email an den User schicken
     res.status(210).send('Fehler beim Erstellen des neuen Passwortes');
@@ -177,6 +222,7 @@ const patchUser = async (req, res) => {
   const { id } = req.params;
 
   const result = await patchUserDB(id, req.body);
+  console.log(result);
 
   if (result) return res.status(200).json(result);
 
