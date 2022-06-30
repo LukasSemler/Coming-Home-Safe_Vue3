@@ -279,7 +279,8 @@ let alarmButtonBlinken = ref(false);
 let alarmBlinkenIntervall = reactive({});
 
 //WEBSOCKET
-let wsServerAdress = ref('ws://localhost:2410');
+// let wsServerAdress = ref('ws://localhost:2410');
+let wsServerAdress = ref('wss://testactionhosting.herokuapp.com/');
 let ws = ref(null);
 let serviceWorkerRegistration = reactive({});
 

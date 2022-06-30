@@ -46,7 +46,7 @@ export default defineConfig({
     },
   },
   //! DAS WIRD ERST GANZ ZUM SCHLUSS WENN WIR DEPLOYEN AUSKOMMENTIERT, NOCH BRUACHEN WIR DEN .dist-ORDNER (für Preview)
-  // build: {
-  //   outDir: path.resolve(__dirname, '../Backend/public'),
-  // },
+  build: {
+    outDir: path.resolve(__dirname, '../Backend/public'),
+  },
 });

@@ -325,7 +325,7 @@ async function login(e) {
     v$.value.$validate();
 
     if (!v$.value.$error) {
-      const res = await axios.post('http://localhost:2410/login', {
+      const res = await axios.post('/login', {
         email: state.email,
         password: state.password,
       });

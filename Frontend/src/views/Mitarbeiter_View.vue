@@ -289,7 +289,8 @@ let mapStyle = 'mapbox://styles/mapbox/streets-v11';
 let mapMarkerListe = ref([]);
 
 let ws = ref(null);
-let wsServerAdress = ref('ws://localhost:2410');
+// let wsServerAdress = ref('ws://localhost:2410');
+let wsServerAdress = ref('wss://testactionhosting.herokuapp.com/');
 
 let nachricht = ref('');
 let nachrichten = ref([]);
