@@ -201,11 +201,8 @@
   </TransitionRoot>
 
   <div>
-    <div class="grid grid-cols-3 my-3 mx-2">
-      <div></div>
-      <div class="flex justify-center">
-        <h1 class="text-center text-3xl sm:text-4xl">Tracking</h1>
-      </div>
+    <div class="flex justify-center my-2">
+      <h1 class="text-center text-3xl sm:text-4xl">Tracking</h1>
     </div>
 
     <!-- Karte -->
@@ -223,7 +220,11 @@
         v-if="statusTracking"
         @click="alarmClicked"
         type="button"
-        :class="`mx-3 inline-flex items-center px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700`"
+        :class="
+          !alarmButtonBlinken
+            ? `mx-3 inline-flex items-center px-6 py-2 border-2 border-transparent text-base font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700`
+            : `mx-3 inline-flex items-center px-6 py-2 border-2 border-red-600 text-base font-medium rounded-md shadow-sm text-red bg-white hover:bg-red-100`
+        "
       >
         Alarm
       </button>
@@ -240,43 +241,51 @@
 </template>
 
 <script setup>
+//IMPORTS
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
 import { ExclamationIcon, ChatIcon, XIcon } from '@heroicons/vue/outline';
-
 import mapbox from 'mapbox-gl';
 import { PiniaStore } from '../Store/Store';
 import { ref, onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import polizeistationFindenScript from '../ZusätzlicheScripts/polizeiFinden.js';
 
-let close = ref(false);
-let openChat = ref(false);
-
+//VUE
 const store = PiniaStore();
 const router = useRouter();
 
+//MAP
 let map = ref(null);
 let mapAccessToken = ref(
   'pk.eyJ1IjoiY29taW5naG9tZXNhZmUiLCJhIjoiY2wwN3RzZThnMDF3czNjbzFndnNrZ3h4OCJ9.xuaKaO_7XzSqiIBCAvcT7w',
 );
 let mapStyle = 'mapbox://styles/mapbox/streets-v11';
-
 let centerPosition = ref(null);
+let mapMarkerListe = ref([]);
+let routenAnweisungen = ref([]);
+let dauerRoute = ref(null);
 
+//TRACKING
 let statusTracking = ref(false);
 let statusTrackingButton = ref('Start');
+let trackInterval = ref(null);
 let color = ref('bg-green-500');
 let colorHover = ref('hover:bg-green-500');
 
-let interval = ref(null);
-let mapMarkerListe = ref([]);
+//ALARM
 let alarmStarted = ref(false);
+let alarmButtonBlinken = ref(false);
+let alarmBlinkenIntervall = reactive({});
 
+//WEBSOCKET
+let wsServerAdress = ref('ws://localhost:2410');
+let ws = ref(null);
 let serviceWorkerRegistration = reactive({});
 
-let ws = ref(null);
-let wsServerAdress = ref('ws://localhost:2410');
-
+//NACHRICHTEN-CHAT
+let close = ref(false);
+let openChat = ref(false);
 let nachricht = ref('');
 let nachrichten = ref([]);
 
@@ -292,13 +301,22 @@ onMounted(async () => {
 
   //ServiceWorker events abfangen
   navigator.serviceWorker.addEventListener('message', async (event) => {
-    console.log(event.data);
+    const { type, data } = JSON.parse(event.data);
+    console.log('Type: ' + type + '| Data: ' + data);
+
+    //Alarm abschalten
+    if (type == 'alarmStopped') {
+      //Alarm clearen
+      clearInterval(alarmBlinkenIntervall);
+      alarmButtonBlinken.value = false;
+      alarmStarted.value = false;
+    }
   });
 
   //ServiceWorker Variable vom Store runterladen
   setTimeout(() => ((serviceWorkerRegistration = store.getServiceWorker), 1500));
 
-  //! Websocket Verbindung Überwachens
+  //! Websocket Verbindung Überwachens --> USER-Chat
   let email = store.getAktivenUser.email;
   email = email.replace('@', '|');
 
@@ -357,7 +375,7 @@ async function startStopTracker() {
       }),
     );
 
-    interval.value = setInterval(track, 5000);
+    trackInterval.value = setInterval(track, 5000);
   } else {
     //Tracking auf SW-Seite beenden
     serviceWorkerRegistration.active.postMessage(
@@ -374,24 +392,20 @@ async function startStopTracker() {
     color.value = 'bg-green-500';
     colorHover.value = 'hover:bg-green-500';
 
-    // Interval stoppen
-    clearInterval(interval.value);
-    interval.value = null;
+    // trackInterval stoppen
+    clearInterval(trackInterval.value);
+    trackInterval.value = null;
 
     // Alle Marker von der Karte entfernen
     deleteAllMarkers();
 
     // Route von der Karte entfernen
-    if (alarmStarted.value) {
-      map.value.removeLayer('route');
-      map.value.removeSource('route');
-
-      map.value.removeLayer('point');
-      map.value.removeSource('point');
-
-      map.value.removeLayer('end');
-      map.value.removeSource('end');
-    }
+    map.value.removeLayer('route');
+    map.value.removeSource('route');
+    map.value.removeLayer('point');
+    map.value.removeSource('point');
+    map.value.removeLayer('end');
+    map.value.removeSource('end');
   }
 }
 
@@ -470,6 +484,16 @@ async function track() {
 
 //Wenn man auf den Alarm-Button clickt
 function alarmClicked() {
+  //Alarm-Variable auf true setzen
+  alarmStarted.value = true;
+
+  //Button zum Blinken bringen
+  alarmBlinkenIntervall = setInterval(() => {
+    alarmButtonBlinken.value
+      ? (alarmButtonBlinken.value = false)
+      : (alarmButtonBlinken.value = true);
+  }, 500);
+
   //Befehl an ServiceWorker senden, um Alarm zu setzen
   serviceWorkerRegistration.active.postMessage(
     JSON.stringify({
@@ -478,6 +502,89 @@ function alarmClicked() {
       payload: store.getAktivenUser,
     }),
   );
+
+  //Route zur nächsten Polizei-Station erstellen
+  let closestPol = polizeistationFindenScript(centerPosition.value.lat, centerPosition.value.lng);
+  let cx = closestPol.station.X;
+  let cy = closestPol.station.Y;
+
+  cx = cx.replace(',', '.');
+  cy = cy.replace(',', '.');
+  cx = Number(cx);
+  cy = Number(cy);
+  console.log(cx, cy);
+  // make an initial directions request that
+  // starts and ends at the same location
+  getRoute([centerPosition.value.lat, centerPosition.value.lng]);
+
+  // Add starting point to the map
+  map.value.addLayer({
+    id: 'point',
+    type: 'circle',
+    source: {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'Point',
+              coordinates: [centerPosition.value.lng, centerPosition.value.lat],
+            },
+          },
+        ],
+      },
+    },
+    paint: {
+      'circle-radius': 10,
+      'circle-color': '#3887be',
+    },
+  });
+  const coords = [cx, cy];
+  const end = {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'Point',
+          coordinates: coords,
+        },
+      },
+    ],
+  };
+  if (map.value.getLayer('end')) {
+    map.value.getSource('end').setData(end);
+  } else {
+    map.value.addLayer({
+      id: 'end',
+      type: 'circle',
+      source: {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: 'Point',
+                coordinates: coords,
+              },
+            },
+          ],
+        },
+      },
+      paint: {
+        'circle-radius': 10,
+        'circle-color': '#f30',
+      },
+    });
+  }
+  getRoute(coords);
 }
 
 //Alle Marker von der Map zu entfernen
@@ -495,9 +602,9 @@ function abmelden() {
   color.value = 'bg-green-500';
   colorHover.value = 'hover:bg-green-500';
 
-  // Interval stoppen
-  clearInterval(interval.value);
-  interval.value = null;
+  // trackInterval stoppen
+  clearInterval(trackInterval.value);
+  trackInterval.value = null;
 
   // Alle Marker von der Karte entfernen
   deleteAllMarkers();
@@ -550,5 +657,61 @@ async function sendPreset(message) {
   nachrichten.value.push({ from: 'Ich', message: message });
 
   nachricht.value = '';
+}
+
+//Route berechnen
+async function getRoute(end) {
+  const start = [centerPosition.value.lng, centerPosition.value.lat];
+  // make a directions request using cycling profile
+  // an arbitrary start will always be the same
+  // only the end or destination will change
+  const query = await axios.get(
+    `https://api.mapbox.com/directions/v5/mapbox/walking/${start[0]},${start[1]};${end[0]},${end[1]}?steps=true&geometries=geojson&access_token=${mapAccessToken.value}`,
+  );
+
+  console.log(query.data);
+
+  const data = query.data.routes[0];
+  const route = data.geometry.coordinates;
+  const geojson = {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'LineString',
+      coordinates: route,
+    },
+  };
+  // if the route already exists on the map, we'll reset it using setData
+  if (map.value.getSource('route')) {
+    map.value.getSource('route').setData(geojson);
+  }
+  // otherwise, we'll make a new request
+  else {
+    map.value.addLayer({
+      id: 'route',
+      type: 'line',
+      source: {
+        type: 'geojson',
+        data: geojson,
+      },
+      layout: {
+        'line-join': 'round',
+        'line-cap': 'round',
+      },
+      paint: {
+        'line-color': '#3887be',
+        'line-width': 5,
+        'line-opacity': 0.75,
+      },
+    });
+  }
+  // Routenanweisung
+  const steps = data.legs[0].steps;
+  for (const step of steps) {
+    routenAnweisungen.value.push(step.maneuver.instruction);
+  }
+  dauerRoute.value = Math.floor(data.duration / 60);
+
+  console.log('GEHZEIT: ' + dauerRoute.value + 'min');
 }
 </script>

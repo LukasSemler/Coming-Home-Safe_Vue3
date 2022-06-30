@@ -161,6 +161,7 @@
   <div class="flex flex-row justify-center m-3 align-middle">
     <h1 class="text-4xl mt-3 mb-5 mx-4">Tracking</h1>
   </div>
+
   <!-- Karte -->
   <div id="map" style="height: 600px"></div>
 
@@ -168,6 +169,7 @@
   <h1 class="text-center text-3xl font-bold my-4" v-if="kundenArrayWS.length > 0">Aktive User</h1>
   <h1 class="text-center text-3xl font-bold my-4" v-else>Momentan ist kein User aktiv</h1>
 
+  <!--Aktive-Userliste-->
   <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mx-3">
     <li
       v-for="kundenItem in kundenArrayWS"
@@ -197,6 +199,20 @@
           </dd>
         </dl>
       </div>
+      <!--Stop-Alarm--Button-->
+      <div class="-mt-px flex divide-x divide-gray-200 cursor-pointer" v-if="kundenItem.alarm">
+        <div class="w-0 flex-1 flex p-4 justify-center">
+          <p class="flex justify-center" @click="stopAlarmClick(kundenItem)">
+            <ExclamationIcon
+              class="w-5 h-5 text-red-500 relative top-1"
+              aria-hidden="true"
+            ></ExclamationIcon>
+            <span class="ml-3 text-red-500">Alarm stoppen</span>
+          </p>
+        </div>
+      </div>
+
+      <!--Andere-Userbuttons-->
       <div>
         <div class="-mt-px flex divide-x divide-gray-200">
           <div class="w-0 flex-1 flex">
@@ -225,7 +241,7 @@
 
 <script setup>
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
-import { ChatIcon, XIcon, MapIcon } from '@heroicons/vue/outline';
+import { ChatIcon, XIcon, MapIcon, ExclamationIcon } from '@heroicons/vue/outline';
 import { CheckCircleIcon } from '@heroicons/vue/outline';
 
 import mapbox from 'mapbox-gl';
@@ -241,13 +257,36 @@ let aktiverUserChat = ref(null);
 let showNewMessage = ref(false);
 let messageFrom = ref('');
 
-let kundenArrayWS = ref([]);
-let mapMarkerListe = ref([]);
+let kundenArrayWS = ref([
+  // {
+  //   adresse: 'Htl Ottakring, Ottakringer Strasse 125, Ottakring, Vienna 1160, Austria',
+  //   dateTime: '12:31:45',
+  //   id: 1,
+  //   lat: 48.211701,
+  //   lng: 16.3129615,
+  //   user: {
+  //     email: 'benjamin@stauf.at',
+  //     geburtsdatum: '2003-10-23T22:00:00.000Z',
+  //     hobbysinteressen: 'öasdklasödkölaskdsöakldalsöd',
+  //     isadmin: false,
+  //     k_id: 29,
+  //     link_thumbnail: 'http://localhost:2410/images/semler.l04@htlwienwest.at.jpg',
+  //     nachname: 'stauf',
+  //     ort: 'Wien',
+  //     passwort: 'BenniPW',
+  //     plz: 1160,
+  //     strasse: 'Steinlegasse 38/3',
+  //     suser: false,
+  //     vorname: 'benjamin',
+  //   },
+  // },
+]);
 
 let map = ref(null);
 let mapAccessToken =
   'pk.eyJ1IjoiY29taW5naG9tZXNhZmUiLCJhIjoiY2wwN3RzZThnMDF3czNjbzFndnNrZ3h4OCJ9.xuaKaO_7XzSqiIBCAvcT7w';
 let mapStyle = 'mapbox://styles/mapbox/streets-v11';
+let mapMarkerListe = ref([]);
 
 let ws = ref(null);
 let wsServerAdress = ref('ws://localhost:2410');
@@ -298,10 +337,6 @@ onMounted(async () => {
     }
     //Wenn sich User tracken lassen
     else if (message.type == 'getPosition') {
-      //TODO Testausgabe dann wieder löschen
-      console.log('Positionen Bekommen');
-      console.log(message.data);
-
       //Schauen ob der Kunde schon im TrackArray ist
       let found = kundenArrayWS.value.find((kunde) => kunde.user.k_id == message.data.user.k_id);
 
@@ -311,6 +346,7 @@ onMounted(async () => {
           ...message.data,
           userfarbe: '#' + Math.floor(Math.random() * 16777215).toString(16),
           nachrichten: [],
+          alarm: false,
         });
       }
       //Die Daten akutellisieren
@@ -323,6 +359,10 @@ onMounted(async () => {
 
       //Alle Kunden auf der Karte richtig anzeigen
       kundenAufKarteAnzeigen();
+    } else if (message.type == 'alarm') {
+      //User auffinden und den alarm auf true setzen
+      console.log('ALARM-MAIL: ' + message.data.email);
+      kundenArrayWS.value.find((kunde) => kunde.user.email == message.data.email).alarm = true;
     } else if (message.type == 'userLeft') {
       console.log('User Left!!!!');
 
@@ -388,16 +428,14 @@ async function getAktuelleKoordinaten() {
 
 //Hier kann der Mitarbeiter auf einen bestimmten Kunden zoomen, um ihn genauer zu beobachten
 function showUserOnMap(kundenItem) {
-  console.log(kundenItem);
-
   //Map auf den Kunden fokusieren
-
   map.value.flyTo({
     center: [kundenItem.lng, kundenItem.lat],
     zoom: 13,
   });
 }
 
+//Den Chat öffnen
 function openChatWindow(user) {
   console.log('User: ', user);
   aktiverUserChat.value = kundenArrayWS.value.find((kunde) => kunde.user.email == user);
@@ -408,8 +446,23 @@ function openChatWindow(user) {
   openChat.value = true;
 }
 
+//Den Chat schließen
 function closeChat() {
   openChat.value = false;
   aktiverUserChat.value = null;
+}
+
+//Wenn der Mitarbeiter auf Stop-Alarm eines Kunden clickt
+function stopAlarmClick(kundeItem) {
+  //Useralarm bei kunden im Userrarray ausschalten
+  kundenArrayWS.value.find((kunde) => kunde.user.email == kundeItem.user.email).alarm = false;
+
+  //Useralarm ausschalten --> Websocket regelt
+  ws.value.send(
+    JSON.stringify({
+      type: 'stopAlarmAsMitarbeiter',
+      daten: kundeItem.user.email,
+    }),
+  );
 }
 </script>
