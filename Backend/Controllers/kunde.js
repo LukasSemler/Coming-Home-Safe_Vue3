@@ -12,7 +12,6 @@ import postmark from 'postmark';
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
-//!!!KANN MAN LÖSCHEN import { SendAuthCodePerMail, SendNewPasswordPerMail } from '../Mail/mail.js';
 
 dotenv.config();
 
@@ -149,7 +148,8 @@ const login = async (req, res) => {
   if (result) {
     if (result.isadmin) {
       const code = makeAuthCode(6);
-      // TODO postmark einbinden
+
+      //Code an User schicken
       // emailClient.sendEmailWithTemplate({
       //   From: 'semler.l04@htlwienwest.at',
       //   To: email,
@@ -195,7 +195,6 @@ const sendNewPassword = async (req, res) => {
 
   if (result) {
     //Email an User senden + Serverfeedback zurückgeben
-    //TODO postmark einbinden
     // emailClient.sendEmailWithTemplate({
     //   From: 'semler.l04@htlwienwest.at',
     //   To: email,
