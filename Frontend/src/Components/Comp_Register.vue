@@ -51,7 +51,7 @@
                     </div>
 
                     <div id="otp" class="flex flex-row justify-center text-center px-2 mt-5">
-                     <input
+                      <input
                         v-model="state2.char1"
                         class="m-2 border h-10 w-10 text-center form-control rounded focus:border-teal-600 focus:ring-teal-600"
                         type="text"
@@ -100,7 +100,7 @@
               <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
                 <button
                   type="button"
-                  class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:col-start-2 sm:text-sm"
+                  class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-teal-600 text-base font-medium text-white hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 sm:col-start-2 sm:text-sm"
                   @click="register"
                 >
                   Verifizieren
@@ -115,7 +115,7 @@
                 </button> -->
                 <button
                   type="button"
-                  class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-1 sm:text-sm"
+                  class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 sm:mt-0 sm:col-start-1 sm:text-sm"
                   @click="showVerifikation = false"
                   ref="cancelButtonRef"
                 >
@@ -449,20 +449,19 @@
 
           <div>
             <button
-              v-if="!checkError"
               @click="getCode"
               class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
             >
               Registrieren
             </button>
 
-            <button
+            <!-- <button
               v-else
               :disabled="checkError"
               class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
             >
               Registrieren
-            </button>
+            </button> -->
           </div>
         </form>
       </div>
@@ -659,6 +658,7 @@ async function getCode(e) {
     v$.value.$validate();
 
     if (!v$.value.$error) {
+      console.log('sucess');
       // Register erledigen
       const { data } = await axios.post('/sendCodeRegister', {
         vorname: state.vorname,

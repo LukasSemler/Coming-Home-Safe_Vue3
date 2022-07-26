@@ -208,6 +208,35 @@
     <!-- Karte -->
     <div id="map" style="height: 500px"></div>
 
+    <SwitchGroup as="div" class="flex items-center justify-between mx-4">
+      <span class="flex-grow flex flex-col">
+        <SwitchLabel as="span" class="text-sm font-medium text-gray-900" passive
+          >Standort überwachen</SwitchLabel
+        >
+        <SwitchDescription as="span" class="text-sm text-gray-500">
+          Wenn aktiviert, wird der Standort übermittelt. Ohne aktivierung können nur der Chat und
+          der Alarm genutzt werden</SwitchDescription
+        >
+      </span>
+      <Switch
+        v-model="enabled"
+        :class="[
+          enabled ? 'bg-green-500' : 'bg-gray-200',
+          'mx-2 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500',
+        ]"
+      >
+        <span
+          aria-hidden="true"
+          :class="[
+            enabled ? 'translate-x-5' : 'translate-x-0',
+            'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200',
+          ]"
+        />
+      </Switch>
+    </SwitchGroup>
+
+    <br />
+
     <div class="flex flex-row justify-center m-3">
       <button
         @click="startStopTracker"
@@ -244,6 +273,7 @@
 //IMPORTS
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
 import { ExclamationIcon, ChatIcon, XIcon } from '@heroicons/vue/outline';
+import { Switch, SwitchDescription, SwitchGroup, SwitchLabel } from '@headlessui/vue';
 import mapbox from 'mapbox-gl';
 import { PiniaStore } from '../Store/Store';
 import { ref, onMounted, reactive } from 'vue';
@@ -262,6 +292,7 @@ let mapAccessToken = ref(
 );
 let mapStyle = 'mapbox://styles/mapbox/streets-v11';
 let centerPosition = ref(null);
+
 let mapMarkerListe = ref([]);
 let routenAnweisungen = ref([]);
 let dauerRoute = ref(null);
@@ -279,8 +310,8 @@ let alarmButtonBlinken = ref(false);
 let alarmBlinkenIntervall = reactive({});
 
 //WEBSOCKET
-// let wsServerAdress = ref('ws://localhost:2410');
-let wsServerAdress = ref('wss://testactionhosting.herokuapp.com/');
+let wsServerAdress = ref('ws://localhost:2410');
+// let wsServerAdress = ref('wss://testactionhosting.herokuapp.com/');
 let ws = ref(null);
 let serviceWorkerRegistration = reactive({});
 
@@ -290,6 +321,9 @@ let openChat = ref(false);
 let nachricht = ref('');
 let nachrichten = ref([]);
 
+// Switch
+let enabled = ref(true);
+
 //Beim Usermap-Aufruf
 onMounted(async () => {
   // Karte laden und zentrieren
@@ -297,7 +331,7 @@ onMounted(async () => {
   try {
     if (!map.value.loaded()) console.log('nicht loaded map');
   } catch (e) {
-    console.log('nicht geladen');
+    console.log('Karte nicht geladen');
   }
 
   //ServiceWorker events abfangen
@@ -336,7 +370,7 @@ async function centerMap() {
   //Aktuellen Standort bekommen
   let getCoordinates = () =>
     new Promise(function (resolve, reject) {
-      navigator.geolocation.getCurrentPosition(resolve, reject);
+      resolve, reject;
     });
 
   let {
@@ -437,7 +471,7 @@ async function track() {
     //Marker auf sich selbst setzen und alten davor löschen
     deleteAllMarkers();
 
-    //Neuen (einzigen) Marker generieren
+    //Neuen () Marker generieren
     const marker1 = new mapbox.Marker({
       anchor: 'center',
       color: '#03C04A',
@@ -445,6 +479,7 @@ async function track() {
       .setLngLat([lng, lat])
       .addTo(map.value)
       .setPopup(new mapbox.Popup().setHTML(`<p>Deine Position: ${standort} </p>`)); // add popup
+
     mapMarkerListe.value.push(marker1);
 
     //Center-Position neu setzen und Map zentrieren

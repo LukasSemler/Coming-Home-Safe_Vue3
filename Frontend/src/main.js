@@ -6,7 +6,7 @@ import { createPinia } from 'pinia';
 import axios from 'axios';
 
 //Base-URL axios
-if (location.origin === 'http://localhost:8080') {
+if (location.origin === 'http://localhost:8080' || location.origin === 'http://localhost:5050') {
   axios.defaults.baseURL = 'http://localhost:2410';
 }
 

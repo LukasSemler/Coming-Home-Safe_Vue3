@@ -105,6 +105,8 @@ const sendCodeUser = async (req, res) => {
   //     company_address: 'Thaliastraße 125',
   //   },
   // });
+
+  res.status(200).send(code);
 };
 
 //Thumbnail setzen und speichern
@@ -140,6 +142,7 @@ const sendDataRegister = async (req, res) => {
 const login = async (req, res) => {
   console.log(req.body);
   const { email, password } = req.body;
+  console.log(email, password);
 
   const result = await loginUser(email, password);
   console.log('result: ', result);
